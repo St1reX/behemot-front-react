@@ -1,0 +1,261 @@
+.login-page {
+  --login-card-width: 30.5rem;
+  --login-dot: color-mix(in oklab, var(--muted-foreground) 42%, transparent);
+}
+
+.login-logo::before,
+.login-logo::after {
+  content: "";
+  width: clamp(2.25rem, 12vw, 4.75rem);
+  height: 1.75rem;
+  background: radial-gradient(var(--login-dot) 1px, transparent 1px) center / 9px 9px;
+  mask-image: radial-gradient(ellipse, black 25%, transparent 75%);
+}
+
+.login-backdrop,
+.login-motion-toggle {
+  display: none;
+}
+
+@media (min-width: 64rem) and (min-height: 36rem) {
+  .login-backdrop {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    pointer-events: none;
+    --trace-color: color-mix(in oklab, var(--border) 76%, var(--muted-foreground));
+    --trace-inset: min(15.5%, 10rem);
+    --light-color: var(--primary);
+    --trace-animation: login-trace-comet;
+    --module-animation: login-module-blink;
+  }
+
+  .login-backdrop [data-light="red"] {
+    --light-color: var(--destructive);
+  }
+
+  .login-trace {
+    position: absolute;
+    inset-inline-start: 0;
+    top: var(--trace-inset);
+    bottom: calc(50% + 8rem);
+    width: calc((100% - var(--login-card-width)) / 2 + 1px);
+    --bend: clamp(2rem, 6dvh, 3rem);
+    --outer-bend: calc(100% - var(--bend) * 2);
+    --inner-bend: calc(100% - var(--bend));
+    --module-inset: clamp(1.5rem, 3vw, 3rem);
+    --module-width: clamp(5rem, 7vw, 7rem);
+    --terminal-start: calc(var(--module-inset) + var(--module-width) + .65rem);
+    --terminal-size: .875rem;
+    --trace-index: 0;
+    --comet-color: var(--primary);
+  }
+
+  .login-trace[data-position$="right"] {
+    inset-inline: auto 0;
+    scale: -1 1;
+    --trace-index: 1;
+    --comet-color: var(--destructive);
+  }
+
+  .login-trace[data-position^="bottom"] {
+    top: calc(50% + 8rem);
+    bottom: var(--trace-inset);
+    scale: 1 -1;
+    --trace-index: 2;
+    --comet-color: var(--chart-2);
+  }
+
+  .login-trace[data-position="bottom-right"] {
+    scale: -1 -1;
+    --trace-index: 3;
+    --comet-color: var(--chart-4);
+  }
+
+  .login-trace::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: var(--trace-color);
+    clip-path: polygon(
+      0 0, var(--outer-bend) 0, var(--inner-bend) var(--bend),
+      var(--inner-bend) calc(100% - var(--bend)), 100% 100%,
+      calc(100% - 1.5px) 100%, calc(var(--inner-bend) - 1px) calc(100% - var(--bend) + .5px),
+      calc(var(--inner-bend) - 1px) calc(var(--bend) + .5px),
+      calc(var(--outer-bend) - .5px) 1px, 0 1px
+    );
+  }
+
+  .login-trace-module {
+    position: absolute;
+    top: 0;
+    left: var(--module-inset);
+    width: var(--module-width);
+    height: 3.25rem;
+    translate: 0 -50%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(var(--card), var(--muted));
+    box-shadow: var(--theme-shadow-sm);
+  }
+
+  .login-trace-module::before,
+  .login-trace-module::after {
+    position: absolute;
+    width: 2.5rem;
+    height: 1.125rem;
+    content: "";
+    background: radial-gradient(var(--login-dot) .8px, transparent .8px) 0 0 / 8px 8px;
+  }
+
+  .login-trace-module::before {
+    top: .4rem;
+    left: .65rem;
+  }
+
+  .login-trace-module::after {
+    right: .4rem;
+    bottom: .25rem;
+  }
+
+  .login-module-light {
+    position: absolute;
+    z-index: 1;
+    width: .1875rem;
+    height: .1875rem;
+    border-radius: 50%;
+    background: var(--light-color);
+    box-shadow: 0 0 5px 1px var(--light-color);
+    opacity: .45;
+    animation: var(--module-animation) 7.2s ease-in-out calc(var(--blink-delay) - var(--trace-index) * 1.5s) infinite;
+  }
+
+  .login-module-light:nth-child(1) {
+    top: .55rem;
+    left: .8rem;
+    --blink-delay: 0s;
+  }
+
+  .login-module-light:nth-child(2) {
+    top: 1.05rem;
+    left: 1.8rem;
+    --blink-delay: -3.6s;
+  }
+
+  .login-module-light:nth-child(3) {
+    right: 1.55rem;
+    bottom: .4rem;
+    --blink-delay: -1.8s;
+  }
+
+  .login-module-light:nth-child(4) {
+    right: .55rem;
+    bottom: .9rem;
+    --blink-delay: -5.4s;
+  }
+
+  .login-trace-terminal {
+    position: absolute;
+    top: 0;
+    left: var(--terminal-start);
+    width: var(--terminal-size);
+    height: var(--terminal-size);
+    translate: 0 -50%;
+    border: 1px solid var(--trace-color);
+    border-radius: .25rem;
+    background: var(--card);
+    box-shadow: var(--theme-shadow-sm), inset 0 0 0 2px var(--muted);
+  }
+
+  .login-trace-comet {
+    position: absolute;
+    width: .375rem;
+    height: .375rem;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--card) 8%, var(--comet-color) 65%);
+    opacity: 0;
+    animation: var(--trace-animation) 18s linear calc(var(--trace-index) * -4.5s) infinite;
+  }
+
+  .login-trace-comet::before {
+    position: absolute;
+    top: 50%;
+    right: 75%;
+    width: 1.75rem;
+    height: .375rem;
+    translate: 0 -50%;
+    border-radius: 100% 0 0 100%;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in oklab, var(--comet-color) 50%, transparent) 70%,
+      var(--comet-color)
+    );
+    filter: blur(1px);
+    content: "";
+  }
+}
+
+@media (min-width: 64rem) and (min-height: 36rem) and (prefers-reduced-motion: reduce) {
+  .login-backdrop[data-allow-motion="false"] {
+    --trace-animation: none;
+    --module-animation: none;
+  }
+
+  .login-motion-toggle {
+    display: inline-flex;
+  }
+}
+
+@keyframes login-module-blink {
+  0%, 100% {
+    opacity: .25;
+  }
+  38% {
+    opacity: 1;
+  }
+  75% {
+    opacity: .45;
+  }
+}
+
+@keyframes login-trace-comet {
+  0% {
+    left: calc(var(--terminal-start) + var(--terminal-size) / 2);
+    top: .5px;
+    rotate: 0deg;
+    opacity: 0;
+  }
+  8%, 90% {
+    opacity: 1;
+  }
+  48% {
+    left: var(--outer-bend);
+    top: .5px;
+    rotate: 0deg;
+  }
+  49%, 62% {
+    rotate: 45deg;
+  }
+  63% {
+    left: calc(var(--inner-bend) - .5px);
+    top: var(--bend);
+    rotate: 90deg;
+  }
+  84% {
+    rotate: 90deg;
+  }
+  85% {
+    left: calc(var(--inner-bend) - .5px);
+    top: calc(100% - var(--bend));
+    rotate: 45deg;
+  }
+  100% {
+    left: 100%;
+    top: 100%;
+    rotate: 45deg;
+    opacity: 0;
+  }
+}

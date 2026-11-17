@@ -1,102 +1,95 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { isAxiosError } from 'axios'
-import { useForm } from 'react-hook-form'
-import { authApiClient } from '@/api/auth/AuthApiClient'
+import { Image, LockKeyhole, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useLogout } from '@/hooks/useLogout'
-import { useAuthStore } from '@/stores/auth.store'
-import type { LoginInput } from '@/types/auth/requests/auth.request.types'
-import { loginSchema } from '@/types/auth/schemas/auth.schema'
+import { LoginBackdrop } from './components/LoginBackdrop'
+import { useLoginForm } from './hooks/useLoginForm'
+import './login.css'
 
 export function LoginPage() {
-  const setUser = useAuthStore((state) => state.setUser)
-  const {
-    clearErrors,
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
-  })
-  const logout = useLogout()
+  const { register, errors, isSubmitting, submit, logout, endSession } = useLoginForm()
   const hasExistingSession = Boolean(errors.root?.session)
 
-  const submit = handleSubmit(async (values) => {
-    try {
-      setUser(await authApiClient.login(values))
-    } catch (error) {
-      const status = isAxiosError(error) ? error.response?.status : undefined
-
-      if (status === 403) {
-        setError('root.session', {
-          message: 'Poprzednia sesja jest wciąż aktywna. Zakończ ją, aby zalogować się ponownie.',
-        })
-        return
-      }
-
-      setError('root.login', {
-        message: status === 401
-          ? 'Logowanie odrzucone. Sprawdź dane i aktywność konta.'
-          : 'Nie udało się zalogować. Spróbuj ponownie.',
-      })
-    }
-  })
-
   return (
-    <main>
-      <h1>Logowanie do Behemota</h1>
-      <form
-        className="max-w-sm space-y-4"
-        noValidate
-        onSubmit={hasExistingSession ? (event) => event.preventDefault() : submit}
-      >
-        <div className="space-y-1.5">
-          <label htmlFor="email">Adres e-mail</label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="username"
-            required
-            aria-invalid={Boolean(errors.email)}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            {...register('email')}
-          />
-          {errors.email && <p id="email-error">{errors.email.message}</p>}
-        </div>
-        <div className="space-y-1.5">
-          <label htmlFor="password">Hasło</label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            aria-invalid={Boolean(errors.password)}
-            aria-describedby={errors.password ? 'password-error' : undefined}
-            {...register('password')}
-          />
-          {errors.password && <p id="password-error">{errors.password.message}</p>}
-        </div>
-        {errors.root?.login && <p role="alert">{errors.root.login.message}</p>}
-        <Button type="submit" disabled={isSubmitting || hasExistingSession}>
-          {isSubmitting ? 'Logowanie…' : 'Zaloguj się'}
-        </Button>
-      </form>
-      {hasExistingSession && (
-        <>
-          <p role="alert">{errors.root?.session?.message}</p>
-          <Button
-            type="button"
-            disabled={logout.isPending}
-            onClick={() => logout.mutate(undefined, { onSuccess: () => clearErrors() })}
+    <main className="login-page relative isolate grid min-h-dvh place-items-center bg-background px-4 py-8 font-sans">
+      <LoginBackdrop />
+      <Card className="relative w-full max-w-(--login-card-width) gap-9 py-7 shadow-lg ring-border sm:[--card-spacing:--spacing(7)]">
+        <CardHeader className="justify-items-center gap-2 text-center">
+          <div className="login-logo mb-5 flex items-center gap-3" aria-hidden="true">
+            <span className="grid size-15 place-items-center rounded-xl border border-border bg-accent text-accent-foreground shadow-sm">
+              <Image className="size-7" strokeWidth={1.5} />
+            </span>
+          </div>
+          <h1 className="text-[1.75rem] leading-tight font-semibold">Witaj ponownie</h1>
+          <CardDescription className="text-secondary-foreground">
+            Zaloguj się do swojego konta w Behemocie.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <form
+            aria-label="Logowanie do Behemota"
+            className="grid gap-4"
+            noValidate
+            onSubmit={hasExistingSession || isSubmitting ? (event) => event.preventDefault() : submit}
           >
-            Zakończ sesję
-          </Button>
-          {logout.isError && <p role="alert">Nie udało się zakończyć sesji. Spróbuj ponownie.</p>}
-        </>
-      )}
+            <div className="grid gap-1.5">
+              <label className="sr-only" htmlFor="email">Adres e-mail</label>
+              <div className="relative">
+                <Mail aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="username"
+                  placeholder="Adres e-mail"
+                  required
+                  className="h-12 bg-background pl-10"
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  {...register('email')}
+                />
+              </div>
+              {errors.email && <p id="email-error" className="text-destructive">{errors.email.message}</p>}
+            </div>
+            <div className="grid gap-1.5">
+              <label className="sr-only" htmlFor="password">Hasło</label>
+              <div className="relative">
+                <LockKeyhole aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Hasło"
+                  required
+                  className="h-12 bg-background pl-10"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  {...register('password')}
+                />
+              </div>
+              {errors.password && <p id="password-error" className="text-destructive">{errors.password.message}</p>}
+            </div>
+            {errors.root?.login && <p role="alert" className="text-destructive">{errors.root.login.message}</p>}
+            <Button className="mt-2 h-11 w-full shadow-sm" type="submit" disabled={isSubmitting || hasExistingSession}>
+              {isSubmitting ? 'Logowanie…' : 'Zaloguj się'}
+            </Button>
+          </form>
+
+          {hasExistingSession && (
+            <div className="mt-4 grid gap-3 rounded-lg border border-border bg-muted p-3">
+              <p role="alert">{errors.root?.session?.message}</p>
+              <Button type="button" variant="outline" disabled={logout.isPending} onClick={endSession}>
+                {logout.isPending ? 'Kończenie sesji…' : 'Zakończ sesję'}
+              </Button>
+              {logout.isError && (
+                <p role="alert" className="text-destructive">
+                  Nie udało się zakończyć sesji. Spróbuj ponownie.
+                </p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </main>
   )
 }
