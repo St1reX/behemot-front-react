@@ -1,7 +1,10 @@
+import { AppRouter } from '@/router/AppRouter'
+import { AppProviders } from './providers/AppProviders'
+
 export default function App() {
   return (
-    <main>
-      <h1>Behemot</h1>
-    </main>
+    <AppProviders>
+      <AppRouter />
+    </AppProviders>
   )
 }
