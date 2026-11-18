@@ -1,5 +1,5 @@
-import { isAxiosError } from 'axios'
 import { create } from 'zustand'
+import { ApiError } from '@/api/errors'
 import { authApiClient } from '@/api/auth/AuthApiClient'
 import type { AppUser } from '@/types/globals/types/appUser.types'
 
@@ -43,7 +43,7 @@ export const useAuthStore = create<AuthState>((set) => {
               return
             }
 
-            if (isAxiosError(error) && error.response?.status === 401) {
+            if (error instanceof ApiError && error.status === 401) {
               set({ user: null, sessionInitialized: true, sessionError: null })
               return
             }

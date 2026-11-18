@@ -11,13 +11,13 @@ import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
 import type { VehicleRecord } from '@/types/vehicles/vehicle.types'
 import { VEHICLE_ENTITIES } from '../vehicle.constants'
-import { getVehicleErrorMessage, getVehicleLabel } from '../vehicle.utils'
+import { getVehicleLabel } from '../vehicle.utils'
 
 interface VehicleListProps {
   records: VehicleRecord[]
   isPending: boolean
   isFetching: boolean
-  error: unknown
+  error: Error | null
   onRefresh: () => void
   onEdit: (record: VehicleRecord) => void
   onDelete: (record: VehicleRecord) => void
@@ -57,7 +57,7 @@ export function VehicleList({
         </div>
         {error ? (
           <p role="alert" className="p-6 text-sm text-destructive">
-            {getVehicleErrorMessage(error)} Użyj przycisku „Odśwież”, aby ponowić odczyt.
+            {error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.
           </p>
         ) : isPending ? (
           <div role="status" className="space-y-4 p-5">

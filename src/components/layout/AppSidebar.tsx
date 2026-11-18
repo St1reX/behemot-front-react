@@ -17,7 +17,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useLogout } from '@/hooks/useLogout'
-import { toast } from '@/lib/toast'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function AppSidebar() {
@@ -97,17 +96,14 @@ export function AppSidebar() {
               tooltip="Wyloguj się"
               aria-label={logout.isPending ? 'Wylogowywanie…' : 'Wyloguj się'}
               disabled={logout.isPending}
-              onClick={() => logout.mutate(undefined, {
-                onError: () => toast.add({
-                  type: 'error',
-                  title: 'Nie udało się wylogować.',
-                  description: 'Spróbuj ponownie.',
-                }),
-              })}
+              onClick={() => logout.mutate()}
             >
               <LogOut aria-hidden="true" />
               <span>{logout.isPending ? 'Wylogowywanie…' : 'Wyloguj się'}</span>
             </SidebarMenuButton>
+            {logout.isError && (
+              <p role="alert" className="px-2 text-sm text-destructive">{logout.error.message}</p>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

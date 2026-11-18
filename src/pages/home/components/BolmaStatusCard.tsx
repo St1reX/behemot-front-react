@@ -78,7 +78,7 @@ export function BolmaStatusCard() {
               </span>
               <p className="mt-3 text-sm text-muted-foreground">
                 {isUnknown
-                  ? 'Nie udało się odczytać statusu. Sprawdź połączenie i spróbuj ponownie.'
+                  ? statusQuery.error?.message ?? 'Oczekiwanie na połączenie z internetem.'
                   : isAvailable
                     ? 'Połączenie z bazą działa prawidłowo.'
                     : 'Baza katalogu nie odpowiada. Spróbujemy ponownie za chwilę.'}

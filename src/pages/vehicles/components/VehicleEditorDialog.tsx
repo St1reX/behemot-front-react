@@ -12,7 +12,6 @@ import { toast } from '@/lib/toast'
 import { generationYearsSchema, vehicleNameSchema } from '@/types/vehicles/vehicle.schema'
 import type { GenerationYearsInput, VehicleNameInput } from '@/types/vehicles/vehicle.schema'
 import type { CarGenerationInput, CarModelInput, VehicleEditorState } from '@/types/vehicles/vehicle.types'
-import { getVehicleErrorMessage } from '../vehicle.utils'
 
 type SaveRequest =
   | { type: 'brand'; id?: string; data: VehicleNameInput }
@@ -151,7 +150,7 @@ export function VehicleEditorDialog({ editor, onClose }: {
       : `Marka: ${editor.carModel.carBrand.name} · Model: ${editor.carModel.name}.`
   const actions: FormActionsProps = {
     isPending: mutation.isPending,
-    error: mutation.isError ? getVehicleErrorMessage(mutation.error) : undefined,
+    error: mutation.error?.message,
     onCancel: onClose,
   }
 

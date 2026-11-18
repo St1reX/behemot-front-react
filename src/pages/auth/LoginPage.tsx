@@ -100,7 +100,7 @@ export function LoginPage() {
                </Button>
                {logout.isError && (
                   <p role="alert" className="text-destructive">
-                     Nie udało się zakończyć sesji. Spróbuj ponownie.
+                     {logout.error.message}
                   </p>
                )}
             </div>

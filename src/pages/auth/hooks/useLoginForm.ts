@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
+import { ApiError } from '@/api/errors'
 import { authApiClient } from '@/api/auth/AuthApiClient'
 import { useLogout } from '@/hooks/useLogout'
 import { toast } from '@/lib/toast'
@@ -31,20 +31,10 @@ export function useLoginForm() {
       toast.add({ type: 'success', title: 'Zalogowano pomyślnie.' })
     },
     onError: (error) => {
-      const status = isAxiosError(error) ? error.response?.status : undefined
-
-      if (status === 403) {
-        setError('root.session', {
-          message: 'Poprzednia sesja jest wciąż aktywna. Zakończ ją, aby zalogować się ponownie.',
-        })
-        return
-      }
-
-      setError('root.login', {
-        message: status === 401
-          ? 'Logowanie odrzucone. Sprawdź dane i aktywność konta.'
-          : 'Nie udało się zalogować. Spróbuj ponownie.',
-      })
+      const field = error instanceof ApiError && error.code === 'AlreadyAuthenticated'
+        ? 'root.session'
+        : 'root.login'
+      setError(field, { message: error.message })
     },
   })
 

@@ -3,7 +3,7 @@ import { vehicleApiClient } from '@/api/vehicles/VehicleApiClient'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { toast } from '@/lib/toast'
 import type { VehicleRecord } from '@/types/vehicles/vehicle.types'
-import { getVehicleErrorMessage, getVehicleLabel } from '../vehicle.utils'
+import { getVehicleLabel } from '../vehicle.utils'
 
 export function VehicleDeleteDialog({ record, onClose }: {
   record: VehicleRecord
@@ -39,7 +39,7 @@ export function VehicleDeleteDialog({ record, onClose }: {
           ? 'Model można usunąć tylko wtedy, gdy nie ma przypisanych generacji.'
           : 'Generację można usunąć tylko wtedy, gdy nie jest przypisana do produktów.'}
       isPending={mutation.isPending}
-      error={mutation.isError ? getVehicleErrorMessage(mutation.error) : undefined}
+      error={mutation.error?.message}
       onOpenChange={(open) => { if (!open) onClose() }}
       onConfirm={() => mutation.mutate()}
     />

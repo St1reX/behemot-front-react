@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, type PropsWithChildren } from 'react'
+import { setSessionExpiredHandler } from '@/api/http'
 import { toast } from '@/lib/toast'
 import { useAuthStore } from '@/stores/auth.store'
 
@@ -7,6 +8,11 @@ export function AuthSession({ children }: PropsWithChildren) {
   const queryClient = useQueryClient()
   const sessionInitialized = useAuthStore((state) => state.sessionInitialized)
   const refreshSession = useAuthStore((state) => state.refreshSession)
+
+  useEffect(() => {
+    setSessionExpiredHandler(() => useAuthStore.getState().setUser(null))
+    return () => setSessionExpiredHandler(undefined)
+  }, [])
 
   useEffect(() => {
     return useAuthStore.subscribe((state, previousState) => {
@@ -30,7 +36,7 @@ export function AuthSession({ children }: PropsWithChildren) {
           id: 'auth-session-error',
           type: 'error',
           title: 'Nie udało się sprawdzić sesji.',
-          description: 'Sprawdź połączenie z internetem lub spróbuj ponownie później.',
+          description: state.sessionError.message,
         })
       } else if (!state.sessionError && previousState.sessionError) {
         toast.close('auth-session-error')

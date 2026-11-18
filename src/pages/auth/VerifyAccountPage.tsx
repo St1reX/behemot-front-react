@@ -1,5 +1,5 @@
-import { isAxiosError } from 'axios'
 import { Link, useSearchParams } from 'react-router'
+import { ApiError } from '@/api/errors'
 import { Button } from '@/components/ui/button'
 import { AuthLayout } from './components/AuthLayout'
 import { useVerifyAccount } from './hooks/useVerifyAccount'
@@ -13,17 +13,9 @@ export function VerifyAccountPage() {
 
 function VerifyAccountResult({ token }: { token: string | null }) {
   const verification = useVerifyAccount(token)
-  const status = isAxiosError(verification.error) ? verification.error.response?.status : undefined
+  const status = verification.error instanceof ApiError ? verification.error.status : undefined
   const isInvalidToken = status === 400 || status === 422
   const isVerifying = Boolean(token) && (verification.isIdle || verification.isPending)
-
-  let errorMessage = 'Nie udało się potwierdzić weryfikacji. Spróbuj ponownie. Jeśli konto zostało już aktywowane, możesz się zalogować.'
-
-  if (isInvalidToken) {
-    errorMessage = 'Link aktywacyjny jest nieprawidłowy, wygasł lub został już wykorzystany. Jeśli konto zostało wcześniej aktywowane, możesz się zalogować.'
-  } else if (status === 429) {
-    errorMessage = 'Zbyt wiele prób weryfikacji. Spróbuj ponownie później.'
-  }
 
   return (
     <AuthLayout title="Weryfikacja konta" description="Potwierdzenie adresu e-mail w Behemocie.">
@@ -36,7 +28,7 @@ function VerifyAccountResult({ token }: { token: string | null }) {
           <p role="status">Konto zostało aktywowane. Możesz się teraz zalogować.</p>
         ) : verification.isError ? (
           <>
-            <p role="alert" className="text-destructive">{errorMessage}</p>
+            <p role="alert" className="text-destructive">{verification.error.message}</p>
             {!isInvalidToken && (
               <Button type="button" variant="outline" onClick={() => verification.mutate(token)}>
                 Spróbuj ponownie

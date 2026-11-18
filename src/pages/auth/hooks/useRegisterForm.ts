@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { authApiClient } from '@/api/auth/AuthApiClient'
 import type { RegisterInput } from '@/types/auth/requests/auth.request.types'
@@ -23,20 +22,7 @@ export function useRegisterForm() {
     retry: false,
     onSuccess: () => reset(),
     onError: (error) => {
-      const status = isAxiosError(error) ? error.response?.status : undefined
-      let message = 'Nie udało się zarejestrować. Spróbuj ponownie.'
-
-      if (status === 409) {
-        message = 'Adres e-mail lub nazwa użytkownika są już zajęte.'
-      } else if (status === 403) {
-        message = 'Masz już aktywną sesję. Odśwież stronę, aby przejść do swojego konta.'
-      } else if (status === 422) {
-        message = 'Sprawdź poprawność danych formularza.'
-      } else if (status === 429) {
-        message = 'Zbyt wiele prób rejestracji. Spróbuj ponownie później.'
-      }
-
-      setError('root.register', { message })
+      setError('root.register', { message: error.message })
     },
   })
 
