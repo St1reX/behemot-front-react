@@ -20,7 +20,7 @@ export function useLoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { username: '', password: '' },
   })
 
   const login = useMutation({

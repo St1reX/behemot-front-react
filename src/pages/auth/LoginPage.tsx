@@ -1,4 +1,4 @@
-import { LockKeyhole, Mail } from 'lucide-react';
+import { LockKeyhole, UserRound } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,29 +20,29 @@ export function LoginPage() {
             }
          >
             <div className="grid gap-1.5">
-               <label className="sr-only" htmlFor="email">
-                  Adres e-mail
+               <label className="sr-only" htmlFor="username">
+                  Nazwa użytkownika
                </label>
                <div className="relative">
-                  <Mail
+                  <UserRound
                      aria-hidden="true"
                      className="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground"
                   />
                   <Input
-                     id="email"
-                     type="email"
+                     id="username"
+                     type="text"
                      autoComplete="username"
-                     placeholder="Adres e-mail"
+                     placeholder="Nazwa użytkownika"
                      required
                      className="h-12 bg-background pl-10"
-                     aria-invalid={Boolean(errors.email)}
-                     aria-describedby={errors.email ? 'email-error' : undefined}
-                     {...register('email')}
+                     aria-invalid={Boolean(errors.username)}
+                     aria-describedby={errors.username ? 'username-error' : undefined}
+                     {...register('username')}
                   />
                </div>
-               {errors.email && (
-                  <p id="email-error" className="text-destructive">
-                     {errors.email.message}
+               {errors.username && (
+                  <p id="username-error" className="text-destructive">
+                     {errors.username.message}
                   </p>
                )}
             </div>
