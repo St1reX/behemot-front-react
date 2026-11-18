@@ -1,19 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
 import { useEffect, type PropsWithChildren } from 'react'
-import { authApiClient } from '@/api/auth/AuthApiClient'
 import { Button } from '@/components/ui/button'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function AuthSession({ children }: PropsWithChildren) {
   const currentUserLoaded = useAuthStore((state) => state.currentUserLoaded)
   const setUser = useAuthStore((state) => state.setUser)
-  const currentUser = useQuery({
-    queryKey: ['auth', 'me'],
-    queryFn: authApiClient.me,
-    enabled: !currentUserLoaded,
-    retry: false,
-    refetchOnWindowFocus: false,
-  })
+  const currentUser = useCurrentUser(!currentUserLoaded)
 
   useEffect(() => {
     if (!currentUserLoaded && currentUser.isSuccess) {

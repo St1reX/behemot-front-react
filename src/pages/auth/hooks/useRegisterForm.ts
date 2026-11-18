@@ -1,13 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { authApiClient } from '@/api/auth/AuthApiClient'
 import type { RegisterInput } from '@/types/auth/requests/auth.request.types'
 import { registerSchema } from '@/types/auth/schemas/auth.schema'
 
 export function useRegisterForm() {
-  const [isRegistered, setIsRegistered] = useState(false)
   const {
     register,
     handleSubmit,
@@ -19,12 +18,11 @@ export function useRegisterForm() {
     defaultValues: { username: '', email: '', password: '' },
   })
 
-  const submit = handleSubmit(async (values) => {
-    try {
-      await authApiClient.register(values)
-      reset()
-      setIsRegistered(true)
-    } catch (error) {
+  const registration = useMutation({
+    mutationFn: authApiClient.register,
+    retry: false,
+    onSuccess: () => reset(),
+    onError: (error) => {
       const status = isAxiosError(error) ? error.response?.status : undefined
       let message = 'Nie udało się zarejestrować. Spróbuj ponownie.'
 
@@ -39,8 +37,16 @@ export function useRegisterForm() {
       }
 
       setError('root.register', { message })
-    }
+    },
   })
 
-  return { register, errors, isSubmitting, isRegistered, submit }
+  const submit = handleSubmit((values) => registration.mutate(values))
+
+  return {
+    register,
+    errors,
+    isSubmitting: isSubmitting || registration.isPending,
+    isRegistered: registration.isSuccess,
+    submit,
+  }
 }

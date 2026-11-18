@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { authApiClient } from '@/api/auth/AuthApiClient'
@@ -21,10 +22,11 @@ export function useLoginForm() {
     defaultValues: { email: '', password: '' },
   })
 
-  const submit = handleSubmit(async (values) => {
-    try {
-      setUser(await authApiClient.login(values))
-    } catch (error) {
+  const login = useMutation({
+    mutationFn: authApiClient.login,
+    retry: false,
+    onSuccess: (user) => setUser(user),
+    onError: (error) => {
       const status = isAxiosError(error) ? error.response?.status : undefined
 
       if (status === 403) {
@@ -39,12 +41,21 @@ export function useLoginForm() {
           ? 'Logowanie odrzucone. Sprawdź dane i aktywność konta.'
           : 'Nie udało się zalogować. Spróbuj ponownie.',
       })
-    }
+    },
   })
+
+  const submit = handleSubmit((values) => login.mutate(values))
 
   function endSession() {
     logout.mutate(undefined, { onSuccess: () => clearErrors() })
   }
 
-  return { register, errors, isSubmitting, submit, logout, endSession }
+  return {
+    register,
+    errors,
+    isSubmitting: isSubmitting || login.isPending,
+    submit,
+    logout,
+    endSession,
+  }
 }
