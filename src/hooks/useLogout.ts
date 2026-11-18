@@ -1,10 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { authApiClient } from '@/api/auth/AuthApiClient'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function useLogout() {
-  const queryClient = useQueryClient()
   const setUser = useAuthStore((state) => state.setUser)
 
   return useMutation({
@@ -18,10 +17,6 @@ export function useLogout() {
       }
     },
     retry: false,
-    onSuccess: async () => {
-      await queryClient.cancelQueries()
-      queryClient.removeQueries()
-      setUser(null)
-    },
+    onSuccess: () => setUser(null),
   })
 }
