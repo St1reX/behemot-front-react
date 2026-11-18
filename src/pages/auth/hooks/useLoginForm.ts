@@ -4,6 +4,7 @@ import { isAxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { authApiClient } from '@/api/auth/AuthApiClient'
 import { useLogout } from '@/hooks/useLogout'
+import { toast } from '@/lib/toast'
 import { useAuthStore } from '@/stores/auth.store'
 import type { LoginInput } from '@/types/auth/requests/auth.request.types'
 import { loginSchema } from '@/types/auth/schemas/auth.schema'
@@ -25,7 +26,10 @@ export function useLoginForm() {
   const login = useMutation({
     mutationFn: authApiClient.login,
     retry: false,
-    onSuccess: (user) => setUser(user),
+    onSuccess: (user) => {
+      setUser(user)
+      toast.add({ type: 'success', title: 'Zalogowano pomyślnie.' })
+    },
     onError: (error) => {
       const status = isAxiosError(error) ? error.response?.status : undefined
 

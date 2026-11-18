@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, type PropsWithChildren } from 'react'
+import { toast } from '@/lib/toast'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function AuthSession({ children }: PropsWithChildren) {
@@ -11,6 +12,28 @@ export function AuthSession({ children }: PropsWithChildren) {
     return useAuthStore.subscribe((state, previousState) => {
       if (previousState.user && previousState.user.id !== state.user?.id) {
         queryClient.removeQueries()
+      }
+
+      if (previousState.user && !state.user) {
+        toast.add({
+          id: 'auth-session-ended',
+          type: 'info',
+          title: 'Sesja została zakończona.',
+          description: 'Zaloguj się, aby kontynuować.',
+        })
+      } else if (state.user && !previousState.user) {
+        toast.close('auth-session-ended')
+      }
+
+      if (state.sessionError && state.sessionError !== previousState.sessionError) {
+        toast.add({
+          id: 'auth-session-error',
+          type: 'error',
+          title: 'Nie udało się sprawdzić sesji.',
+          description: 'Sprawdź połączenie z internetem lub spróbuj ponownie później.',
+        })
+      } else if (!state.sessionError && previousState.sessionError) {
+        toast.close('auth-session-error')
       }
     })
   }, [queryClient])
