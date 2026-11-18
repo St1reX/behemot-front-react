@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, UserRound } from 'lucide-react'
+import { CarFront, LayoutDashboard, LogOut, UserRound } from 'lucide-react'
 import { Link, NavLink, useMatch } from 'react-router'
 import behemotLogo from '@/assets/images/behemot-logo.jpeg'
 import {
@@ -24,6 +24,7 @@ export function AppSidebar() {
   const username = useAuthStore((state) => state.user?.username)
   const logout = useLogout()
   const isHomePage = Boolean(useMatch({ path: '/', end: true }))
+  const isVehiclesPage = Boolean(useMatch({ path: '/vehicles', end: false }))
   const { setOpenMobile } = useSidebar()
 
   return (
@@ -67,6 +68,17 @@ export function AppSidebar() {
                 >
                   <LayoutDashboard aria-hidden="true" />
                   <span>Pulpit</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  render={<NavLink to="/vehicles" onClick={() => setOpenMobile(false)} />}
+                  isActive={isVehiclesPage}
+                  tooltip="Pojazdy"
+                  aria-label="Pojazdy"
+                >
+                  <CarFront aria-hidden="true" />
+                  <span>Pojazdy</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth.store'
+import type { Privilege } from '@/shared/constants/privileges'
 
 export function useAccess() {
   const user = useAuthStore((state) => state.user)
@@ -12,12 +13,12 @@ export function useAccess() {
     return roles.includes(user.role.name)
   }
 
-  function requirePrivilege(requiredPrivileges: string | readonly string[]): boolean {
+  function requirePrivilege(requiredPrivileges: Privilege | readonly Privilege[]): boolean {
     if (!user?.isActive) {
       return false
     }
 
-    const privileges = typeof requiredPrivileges === 'string'
+    const privileges: readonly string[] = typeof requiredPrivileges === 'string'
       ? [requiredPrivileges]
       : requiredPrivileges
 
