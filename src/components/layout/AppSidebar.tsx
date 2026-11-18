@@ -1,4 +1,4 @@
-import { CarFront, LayoutDashboard, LogOut, UserRound } from 'lucide-react'
+import { CarFront, Factory, Handshake, LayoutDashboard, LogOut, UserRound } from 'lucide-react'
 import { Link, NavLink, useMatch } from 'react-router'
 import behemotLogo from '@/assets/images/behemot-logo.jpeg'
 import {
@@ -17,6 +17,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useLogout } from '@/hooks/useLogout'
+import { useAccess } from '@/hooks/useAccess'
+import { ACTIONS } from '@/shared/constants/actions'
+import { ENTITIES } from '@/shared/constants/entities'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function AppSidebar() {
@@ -24,6 +27,9 @@ export function AppSidebar() {
   const logout = useLogout()
   const isHomePage = Boolean(useMatch({ path: '/', end: true }))
   const isVehiclesPage = Boolean(useMatch({ path: '/vehicles', end: false }))
+  const isContractorsPage = Boolean(useMatch({ path: '/contractors', end: false }))
+  const isProducersPage = Boolean(useMatch({ path: '/producers', end: false }))
+  const { requirePrivilege } = useAccess()
   const { setOpenMobile } = useSidebar()
 
   return (
@@ -80,6 +86,32 @@ export function AppSidebar() {
                   <span>Pojazdy</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {requirePrivilege(`${ENTITIES.CONTRACTOR}:${ACTIONS.READ}`) && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to="/contractors" onClick={() => setOpenMobile(false)} />}
+                    isActive={isContractorsPage}
+                    tooltip="Kontrahenci"
+                    aria-label="Kontrahenci"
+                  >
+                    <Handshake aria-hidden="true" />
+                    <span>Kontrahenci</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+              {requirePrivilege(`${ENTITIES.PRODUCER}:${ACTIONS.READ}`) && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to="/producers" onClick={() => setOpenMobile(false)} />}
+                    isActive={isProducersPage}
+                    tooltip="Producenci"
+                    aria-label="Producenci"
+                  >
+                    <Factory aria-hidden="true" />
+                    <span>Producenci</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

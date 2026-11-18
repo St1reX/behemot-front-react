@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { z } from 'zod'
 import { vehicleApiClient } from '@/api/vehicles/VehicleApiClient'
+import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
@@ -101,12 +102,10 @@ function VehicleCatalog({ brandId, modelId }: { brandId: string | null; modelId:
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">Pojazdy</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Marki, modele i ich generacje. Wybierz markę, aby przejść dalej.
-        </p>
-      </div>
+      <PageHeader
+        title="Pojazdy"
+        description="Marki, modele i ich generacje. Wybierz markę, aby przejść dalej."
+      />
       <nav aria-label="Ścieżka katalogu pojazdów">
         <ol className="flex flex-wrap items-center gap-2 text-sm">
           <li>
