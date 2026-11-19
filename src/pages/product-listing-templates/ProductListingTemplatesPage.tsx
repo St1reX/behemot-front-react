@@ -74,7 +74,6 @@ export function ProductListingTemplatesPage() {
               <TableBody>{filtered.map((template) => <TableRow key={template.id}>
                 <TableCell className="max-w-xs pl-5">
                   <Link to={`/listing-templates/${template.id}`} className="font-medium text-primary underline-offset-4 hover:underline">{template.name}</Link>
-                  <p className="mt-1 truncate font-mono text-xs text-muted-foreground">{template.titleTemplate}</p>
                 </TableCell>
                 <TableCell>{template.department.name}</TableCell>
                 <TableCell className="hidden text-muted-foreground lg:table-cell">{new Date(template.updatedAt).toLocaleDateString('pl-PL')}</TableCell>
