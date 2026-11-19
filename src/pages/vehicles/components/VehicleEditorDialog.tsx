@@ -47,7 +47,7 @@ function NameForm({ initialName, onSubmit, ...actions }: FormActionsProps & {
 
   return (
     <form className="space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-1.5">
+      <div className="grid gap-2">
         <label htmlFor="vehicle-name" className="text-sm font-medium">Nazwa</label>
         <Input
           id="vehicle-name"
@@ -75,7 +75,7 @@ function GenerationForm({ initialValues, onSubmit, ...actions }: FormActionsProp
 
   return (
     <form className="space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-1.5">
+      <div className="grid gap-2">
         <label htmlFor="production-start" className="text-sm font-medium">Początek produkcji</label>
         <Input
           id="production-start"
@@ -89,7 +89,7 @@ function GenerationForm({ initialValues, onSubmit, ...actions }: FormActionsProp
         />
         {errors.startProduction && <p id="production-start-error" className="text-xs text-destructive">{errors.startProduction.message}</p>}
       </div>
-      <div className="space-y-1.5">
+      <div className="grid gap-2">
         <label htmlFor="production-end" className="text-sm font-medium">Koniec produkcji</label>
         <Input
           id="production-end"

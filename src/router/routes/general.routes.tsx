@@ -3,6 +3,8 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { HomePage } from '@/pages/home/HomePage'
 import { ContractorsPage } from '@/pages/contractors/ContractorsPage'
 import { ProducersPage } from '@/pages/producers/ProducersPage'
+import { ProductListingTemplatesPage } from '@/pages/product-listing-templates/ProductListingTemplatesPage'
+import { ProductListingTemplateEditorPage } from '@/pages/product-listing-templates/ProductListingTemplateEditorPage'
 import { VehiclesPage } from '@/pages/vehicles/VehiclesPage'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
@@ -27,6 +29,17 @@ export const generalRoutes: RouteObject[] = [
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCER}:${ACTIONS.READ}`} />,
             children: [{ path: '/producers', element: <ProducersPage /> }],
+          },
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.READ}`} />,
+            children: [
+              { path: '/listing-templates', element: <ProductListingTemplatesPage /> },
+              { path: '/listing-templates/:id', element: <ProductListingTemplateEditorPage /> },
+            ],
+          },
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.CREATE}`} />,
+            children: [{ path: '/listing-templates/new', element: <ProductListingTemplateEditorPage /> }],
           },
         ],
       },

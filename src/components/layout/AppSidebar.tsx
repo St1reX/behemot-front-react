@@ -1,4 +1,4 @@
-import { CarFront, Factory, Handshake, LayoutDashboard, LogOut, UserRound } from 'lucide-react'
+import { CarFront, Factory, FileText, Handshake, LayoutDashboard, LogOut, UserRound } from 'lucide-react'
 import { Link, NavLink, useMatch } from 'react-router'
 import behemotLogo from '@/assets/images/behemot-logo.jpeg'
 import {
@@ -29,6 +29,7 @@ export function AppSidebar() {
   const isVehiclesPage = Boolean(useMatch({ path: '/vehicles', end: false }))
   const isContractorsPage = Boolean(useMatch({ path: '/contractors', end: false }))
   const isProducersPage = Boolean(useMatch({ path: '/producers', end: false }))
+  const isListingTemplatesPage = Boolean(useMatch({ path: '/listing-templates', end: false }))
   const { requirePrivilege } = useAccess()
   const { setOpenMobile } = useSidebar()
 
@@ -109,6 +110,19 @@ export function AppSidebar() {
                   >
                     <Factory aria-hidden="true" />
                     <span>Producenci</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+              {requirePrivilege(`${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.READ}`) && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<NavLink to="/listing-templates" onClick={() => setOpenMobile(false)} />}
+                    isActive={isListingTemplatesPage}
+                    tooltip="Szablony ogłoszeń"
+                    aria-label="Szablony ogłoszeń"
+                  >
+                    <FileText aria-hidden="true" />
+                    <span>Szablony ogłoszeń</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}

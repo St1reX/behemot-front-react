@@ -41,7 +41,7 @@ export function ProducerEditorDialog({ producer, onClose }: {
           <DialogDescription>Podaj nazwę. Maksymalnie 100 znaków.</DialogDescription>
         </DialogHeader>
         <form className="space-y-4" noValidate onSubmit={handleSubmit((values) => mutation.mutate(values))}>
-          <div className="space-y-1.5">
+          <div className="grid gap-2">
             <label htmlFor="producer-name" className="text-sm font-medium">Nazwa</label>
             <Input
               id="producer-name"
