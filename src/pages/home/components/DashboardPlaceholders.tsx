@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { RecentActivityCard } from './RecentActivityCard'
 
 export function IndicatorPlaceholder() {
   return (
@@ -28,7 +29,7 @@ export function IndicatorPlaceholder() {
 
 export function DashboardPlaceholders() {
   return (
-    <section aria-label="Pozostałe sekcje — w przygotowaniu" className="grid gap-5 @4xl/dashboard:grid-cols-7">
+    <section aria-label="Przegląd katalogu i ostatnia aktywność" className="grid gap-5 @4xl/dashboard:grid-cols-7">
       <Card className="shadow-none @4xl/dashboard:col-span-4 [--card-spacing:--spacing(5)]">
         <CardHeader className="flex items-center justify-between gap-2">
           <h2 className="text-base font-semibold tracking-normal">Przegląd katalogu</h2>
@@ -44,24 +45,7 @@ export function DashboardPlaceholders() {
           </div>
         </CardContent>
       </Card>
-      <Card className="shadow-none @4xl/dashboard:col-span-3 [--card-spacing:--spacing(5)]">
-        <CardHeader className="flex items-center justify-between gap-2">
-          <h2 className="text-base font-semibold tracking-normal">Ostatnia aktywność</h2>
-          <span className="text-xs text-muted-foreground">W przygotowaniu</span>
-        </CardHeader>
-        <CardContent aria-hidden="true" className="space-y-7 pt-2">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <Skeleton className="size-10 shrink-0 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-3.5 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
-              <Skeleton className="h-3 w-10" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <RecentActivityCard />
     </section>
   )
 }

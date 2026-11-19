@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { HomePage } from '@/pages/home/HomePage'
+import { AuditLogsPage } from '@/pages/audit-logs/AuditLogsPage'
 import { ContractorsPage } from '@/pages/contractors/ContractorsPage'
 import { ProducersPage } from '@/pages/producers/ProducersPage'
 import { ProductListingTemplatesPage } from '@/pages/product-listing-templates/ProductListingTemplatesPage'
@@ -18,6 +19,10 @@ export const generalRoutes: RouteObject[] = [
         element: <AppLayout />,
         children: [
           { path: '/', element: <HomePage /> },
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.AUDIT_LOG}:${ACTIONS.READ}`} />,
+            children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
+          },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.CAR_BRAND}:${ACTIONS.READ}`} />,
             children: [{ path: '/vehicles', element: <VehiclesPage /> }],
