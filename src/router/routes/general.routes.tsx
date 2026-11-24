@@ -7,6 +7,7 @@ import { ProducersPage } from '@/pages/producers/ProducersPage'
 import { ProductListingTemplatesPage } from '@/pages/product-listing-templates/ProductListingTemplatesPage'
 import { ProductListingTemplateEditorPage } from '@/pages/product-listing-templates/ProductListingTemplateEditorPage'
 import { VehiclesPage } from '@/pages/vehicles/VehiclesPage'
+import { WarehousesPage } from '@/pages/warehouses/WarehousesPage'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
 import { RequireAuth, RequirePrivilege } from '../guards'
@@ -34,6 +35,10 @@ export const generalRoutes: RouteObject[] = [
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCER}:${ACTIONS.READ}`} />,
             children: [{ path: '/producers', element: <ProducersPage /> }],
+          },
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.WAREHOUSE}:${ACTIONS.READ}`} />,
+            children: [{ path: '/warehouses', element: <WarehousesPage /> }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.READ}`} />,
