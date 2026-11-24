@@ -8,6 +8,7 @@ import { ProductListingTemplatesPage } from '@/pages/product-listing-templates/P
 import { ProductListingTemplateEditorPage } from '@/pages/product-listing-templates/ProductListingTemplateEditorPage'
 import { VehiclesPage } from '@/pages/vehicles/VehiclesPage'
 import { WarehousesPage } from '@/pages/warehouses/WarehousesPage'
+import { RolesPage } from '@/pages/roles/RolesPage'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
 import { RequireAuth, RequirePrivilege } from '../guards'
@@ -20,6 +21,10 @@ export const generalRoutes: RouteObject[] = [
         element: <AppLayout />,
         children: [
           { path: '/', element: <HomePage /> },
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.ROLE}:${ACTIONS.READ}`} />,
+            children: [{ path: '/roles', element: <RolesPage /> }],
+          },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.AUDIT_LOG}:${ACTIONS.READ}`} />,
             children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
