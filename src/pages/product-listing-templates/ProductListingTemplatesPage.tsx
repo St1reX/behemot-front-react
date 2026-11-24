@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { Eye, Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { productListingTemplateApiClient } from '@/api/product-listing-templates/ProductListingTemplateApiClient'
 import { PageHeader } from '@/components/common/PageHeader'
+import { ListSkeleton } from '@/components/common/ListSkeleton'
+import { ListToolbar } from '@/components/common/ListToolbar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
@@ -43,28 +44,20 @@ export function ProductListingTemplatesPage() {
         actions={canCreate && <Button render={<Link to="/listing-templates/new" />} nativeButton={false}><Plus aria-hidden="true" />Dodaj szablon</Button>} />
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
-            <div className="flex w-full flex-wrap gap-3 sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input aria-label="Szukaj szablonu" placeholder="Szukaj szablonu…" className="pl-9" value={search} onChange={(event) => setSearch(event.target.value)} />
-              </div>
-              <select aria-label="Filtruj szablony według działu" value={selectedDepartmentId} onChange={(event) => setDepartmentId(event.target.value)}
-                className="h-8 max-w-full rounded-lg border border-input bg-background px-2.5 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
-                <option value="">Wszystkie działy</option>
-                {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
-              </select>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              {!query.isPending && !query.error && <span>Wyniki: {filtered.length} / {templates.length}</span>}
-              <Button type="button" variant="outline" size="sm" disabled={query.isFetching} onClick={() => { void query.refetch() }}>
-                <RefreshCw aria-hidden="true" className={query.isFetching ? 'animate-spin motion-reduce:animate-none' : undefined} />Odśwież
-              </Button>
-            </div>
-          </div>
+          <ListToolbar
+            search={{ value: search, onChange: setSearch, label: 'Szukaj szablonu', placeholder: 'Szukaj szablonu…' }}
+            summary={!query.isPending && !query.error && <span>Wyniki: {filtered.length} / {templates.length}</span>}
+            isFetching={query.isFetching}
+            onRefresh={() => { void query.refetch() }}
+          >
+            <NativeSelect aria-label="Filtruj szablony według działu" value={selectedDepartmentId}
+              onChange={(event) => setDepartmentId(event.target.value)} className="w-full min-w-0 sm:w-auto sm:max-w-xs">
+              <NativeSelectOption value="">Wszystkie działy</NativeSelectOption>
+              {departments.map((department) => <NativeSelectOption key={department.id} value={department.id}>{department.name}</NativeSelectOption>)}
+            </NativeSelect>
+          </ListToolbar>
           {query.error ? <p role="alert" className="p-6 text-sm text-destructive">{query.error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.</p>
-            : query.isPending ? <div role="status" className="space-y-4 p-5"><span className="sr-only">Wczytywanie szablonów…</span>
-              {Array.from({ length: 5 }, (_, index) => <Skeleton key={index} className="h-10 w-full" />)}</div>
+            : query.isPending ? <ListSkeleton message="Wczytywanie szablonów…" />
             : filtered.length === 0 ? <p role="status" className="p-10 text-center text-sm text-muted-foreground">{templates.length === 0 ? 'Nie dodano jeszcze żadnych szablonów.' : 'Brak wyników dla wybranych filtrów.'}</p>
             : <Table>
               <TableHeader><TableRow>

@@ -2,14 +2,15 @@ import { getActionLabel } from '@/shared/constants/actions'
 import { getEntityLabel } from '@/shared/constants/entities'
 import { OPERATION_STATUS_CLASSES, OPERATION_STATUS_LABELS } from '@/shared/constants/operationStatuses'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Eye, History, RefreshCw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Eye, History } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { auditLogApiClient } from '@/api/audit-logs/AuditLogApiClient'
+import { ListSkeleton } from '@/components/common/ListSkeleton'
+import { ListToolbar } from '@/components/common/ListToolbar'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { AuditLogFilters as Filters } from '@/types/audit-logs/auditLog.types'
 import { formatAuditDate } from './auditLog.utils'
@@ -33,20 +34,22 @@ export function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Logi audytowe" description="Historia operacji w systemie. Sprawdź, kto i kiedy wprowadził zmiany." actions={
-        <Button type="button" variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw aria-hidden="true" className={query.isFetching ? 'animate-spin motion-reduce:animate-none' : undefined} />Odśwież</Button>
-      } />
+      <PageHeader title="Logi audytowe" description="Historia operacji w systemie. Sprawdź, kto i kiedy wprowadził zmiany." />
       <AuditLogFilters onApply={(values) => { setFilters(values); setPage(1) }} />
       <Card className="gap-0 overflow-hidden py-0 shadow-none">
         <CardContent className="p-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
+          <ListToolbar
+            className="px-5"
+            summary={<span>{activeFilterCount > 0 ? `Aktywne filtry: ${activeFilterCount}` : 'Wszystkie wpisy'} · Od najnowszych</span>}
+            isFetching={query.isFetching}
+            onRefresh={() => { void query.refetch() }}
+          >
             <div className="flex items-center gap-2"><History aria-hidden="true" className="size-4 text-muted-foreground" /><h2 className="text-sm font-semibold tracking-normal">Historia operacji</h2>{query.data && <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{query.data.total}</span>}</div>
-            <span className="text-xs text-muted-foreground">{activeFilterCount > 0 ? `Aktywne filtry: ${activeFilterCount}` : 'Wszystkie wpisy'} · Od najnowszych</span>
-          </div>
+          </ListToolbar>
           {query.error ? (
             <p role="alert" className="p-6 text-sm text-destructive">{query.error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.</p>
           ) : query.isPending ? (
-            <div role="status" className="space-y-3 p-5"><span className="sr-only">Wczytywanie historii…</span>{Array.from({ length: 5 }, (_, index) => <Skeleton key={index} aria-hidden="true" className="h-12 w-full" />)}</div>
+            <ListSkeleton message="Wczytywanie historii…" rowClassName="h-12" className="space-y-3" />
           ) : query.data.items.length === 0 ? (
             <div role="status" className="grid justify-items-center gap-3 p-10 text-center"><History aria-hidden="true" className="size-8 text-muted-foreground/50" /><p className="text-sm font-medium">Brak wpisów</p><p className="text-sm text-muted-foreground">{activeFilterCount > 0 ? 'Zmień lub wyczyść filtry, aby zobaczyć więcej wyników.' : 'Zarejestrowane operacje pojawią się w tym miejscu.'}</p></div>
           ) : (

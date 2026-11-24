@@ -14,6 +14,7 @@ import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAccess } from '@/hooks/useAccess'
 import { toast } from '@/lib/toast'
@@ -198,12 +199,12 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
             <div className="space-y-1.5">
               <label htmlFor="template-department" className="text-sm font-medium">Dział</label>
               {canReadDepartments && canEdit ? (
-                <select id="template-department" {...register('departmentId')}
+                <NativeSelect id="template-department" {...register('departmentId')}
                   aria-invalid={Boolean(errors.departmentId)} aria-describedby={errors.departmentId ? 'template-department-error' : undefined}
-                  className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50">
-                  <option value="">Wybierz dział</option>
-                  {departmentOptions.map((department) => <option key={department.id} value={department.id}>{department.name} ({department.shortcut})</option>)}
-                </select>
+                  className="w-full">
+                  <NativeSelectOption value="">Wybierz dział</NativeSelectOption>
+                  {departmentOptions.map((department) => <NativeSelectOption key={department.id} value={department.id}>{department.name} ({department.shortcut})</NativeSelectOption>)}
+                </NativeSelect>
               ) : (
                 <>
                   <Input id="template-department" readOnly value={template?.department.name ?? 'Brak dostępu do działów'} />

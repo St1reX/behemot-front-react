@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 import { auditLogApiClient } from '@/api/audit-logs/AuditLogApiClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ListSkeleton } from '@/components/common/ListSkeleton'
 import { useAccess } from '@/hooks/useAccess'
 import { formatAuditDate } from '@/pages/audit-logs/auditLog.utils'
 import { ACTIONS, getActionLabel } from '@/shared/constants/actions'
@@ -35,7 +35,7 @@ export function RecentActivityCard() {
       <CardContent>
         {!canRead ? <p className="py-5 text-sm text-muted-foreground">Nie masz uprawnień do przeglądania historii operacji.</p>
           : query.error ? <p role="alert" className="py-5 text-sm text-destructive">{query.error.message} Ponów odczyt przyciskiem odświeżania.</p>
-          : query.isPending ? <div role="status" className="space-y-4 py-2"><span className="sr-only">Wczytywanie aktywności…</span>{Array.from({ length: 5 }, (_, index) => <Skeleton key={index} aria-hidden="true" className="h-16 w-full" />)}</div>
+          : query.isPending ? <ListSkeleton message="Wczytywanie aktywności…" rowClassName="h-16" className="px-0 py-2" />
           : query.data.items.length === 0 ? <div className="grid justify-items-center gap-3 py-10 text-center"><History aria-hidden="true" className="size-8 text-muted-foreground/50" /><p className="text-sm text-muted-foreground">Nie zarejestrowano jeszcze żadnej aktywności.</p></div>
           : <ol className="divide-y">{query.data.items.slice(0, RECENT_ACTIVITY_LIMIT).map((log) => {
             const Icon = activityIcons[log.action as keyof typeof activityIcons] ?? History

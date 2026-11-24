@@ -1,10 +1,10 @@
-import { ChevronLeft, ChevronRight, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { ListSkeleton } from '@/components/common/ListSkeleton'
+import { ListToolbar } from '@/components/common/ListToolbar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
@@ -41,43 +41,25 @@ export function VehicleList({
   return (
     <Card className="gap-0 py-0">
       <CardContent className="p-0">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
-          <form className="flex w-full items-center gap-2 sm:max-w-md" onSubmit={(event) => {
-            event.preventDefault()
-            onSearch(draftSearch.trim())
-          }}>
-            <div className="relative min-w-0 flex-1">
-              <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                aria-label={isGeneration ? 'Szukaj po roku początku lub końca produkcji albo wpisz obecnie' : 'Szukaj po nazwie'}
-                placeholder={isGeneration ? 'Rok początku / końca lub „obecnie”…' : 'Szukaj po nazwie…'}
-                maxLength={100}
-                className="pl-9"
-                value={draftSearch}
-                onChange={(event) => setDraftSearch(event.target.value)}
-              />
-            </div>
-            <Button type="submit" variant="outline" size="sm">Szukaj</Button>
-          </form>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            {!isPending && !error && total !== undefined && <span>Wyniki: {total}</span>}
-            <Button type="button" variant="outline" size="sm" disabled={isFetching} onClick={onRefresh}>
-              <RefreshCw aria-hidden="true" className={isFetching ? 'animate-spin motion-reduce:animate-none' : undefined} />
-              Odśwież
-            </Button>
-          </div>
-        </div>
+        <ListToolbar
+          search={{
+            value: draftSearch,
+            onChange: setDraftSearch,
+            label: isGeneration ? 'Szukaj po roku początku lub końca produkcji albo wpisz obecnie' : 'Szukaj po nazwie',
+            placeholder: isGeneration ? 'Rok początku / końca lub „obecnie”…' : 'Szukaj po nazwie…',
+            maxLength: 100,
+            onSubmit: () => onSearch(draftSearch.trim()),
+          }}
+          summary={!isPending && !error && total !== undefined && <span>Wyniki: {total}</span>}
+          isFetching={isFetching}
+          onRefresh={onRefresh}
+        />
         {error ? (
           <p role="alert" className="p-6 text-sm text-destructive">
             {error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.
           </p>
         ) : isPending ? (
-          <div role="status" className="space-y-4 p-5">
-            <span className="sr-only">Wczytywanie listy…</span>
-            {Array.from({ length: 5 }, (_, index) => (
-              <Skeleton key={index} aria-hidden="true" className="h-10 w-full" />
-            ))}
-          </div>
+          <ListSkeleton message="Wczytywanie pojazdów…" />
         ) : records.length === 0 ? (
           <p role="status" className="p-10 text-center text-sm text-muted-foreground">
             {search ? 'Brak wyników dla podanej frazy.' : 'Na tym poziomie nie ma jeszcze żadnych elementów.'}

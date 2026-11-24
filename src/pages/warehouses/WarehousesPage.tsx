@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { Pencil, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { warehouseApiClient } from '@/api/warehouses/WarehouseApiClient'
+import { ListSkeleton } from '@/components/common/ListSkeleton'
+import { ListToolbar } from '@/components/common/ListToolbar'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
@@ -49,34 +49,18 @@ export function WarehousesPage() {
       />
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
-            <div className="relative w-full sm:max-w-xs">
-              <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                aria-label="Szukaj po nazwie lub adresie"
-                placeholder="Szukaj po nazwie lub adresie…"
-                className="pl-9"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              {!query.isPending && !query.error && <span>Wyniki: {filtered.length} / {warehouses.length}</span>}
-              <Button type="button" variant="outline" size="sm" disabled={query.isFetching} onClick={() => { void query.refetch() }}>
-                <RefreshCw aria-hidden="true" className={query.isFetching ? 'animate-spin motion-reduce:animate-none' : undefined} />
-                Odśwież
-              </Button>
-            </div>
-          </div>
+          <ListToolbar
+            search={{ value: search, onChange: setSearch, label: 'Szukaj po nazwie lub adresie', placeholder: 'Szukaj po nazwie lub adresie…' }}
+            summary={!query.isPending && !query.error && <span>Wyniki: {filtered.length} / {warehouses.length}</span>}
+            isFetching={query.isFetching}
+            onRefresh={() => { void query.refetch() }}
+          />
           {query.error ? (
             <p role="alert" className="p-6 text-sm text-destructive">
               {query.error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.
             </p>
           ) : query.isPending ? (
-            <div role="status" className="space-y-4 p-5">
-              <span className="sr-only">Wczytywanie listy…</span>
-              {Array.from({ length: 5 }, (_, index) => <Skeleton key={index} aria-hidden="true" className="h-10 w-full" />)}
-            </div>
+            <ListSkeleton message="Wczytywanie magazynów…" />
           ) : filtered.length === 0 ? (
             <p role="status" className="p-10 text-center text-sm text-muted-foreground">
               {warehouses.length === 0 ? 'Nie dodano jeszcze żadnych magazynów.' : 'Brak wyników dla podanej frazy.'}
