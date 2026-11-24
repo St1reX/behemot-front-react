@@ -34,7 +34,7 @@ export function UsersPage() {
   const users = query.data ?? []
   const searchPhrase = search.trim().toLocaleLowerCase('pl-PL')
   const filtered = users.filter((user) => (
-    [user.username, user.email, user.role.name, user.department?.name]
+    [user.username, user.email, user.role.name]
       .join(' ').toLocaleLowerCase('pl-PL').includes(searchPhrase)
   ))
 
@@ -47,7 +47,7 @@ export function UsersPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
             <div className="relative w-full sm:max-w-xs">
               <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input aria-label="Szukaj po nazwie, e-mailu, roli lub dziale" placeholder="Szukaj użytkowników…" className="pl-9"
+              <Input aria-label="Szukaj po nazwie, e-mailu lub roli" placeholder="Szukaj użytkowników…" className="pl-9"
                 value={search} onChange={(event) => setSearch(event.target.value)} />
             </div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -72,18 +72,17 @@ export function UsersPage() {
             <Table>
               <TableHeader><TableRow>
                 <TableHead className="pl-5">Użytkownik</TableHead><TableHead>Rola</TableHead>
-                <TableHead className="hidden sm:table-cell">Dział</TableHead><TableHead>Status</TableHead>
+                <TableHead>Status</TableHead>
                 {(canUpdate || canDelete) && <TableHead className="pr-5 text-right">Akcje</TableHead>}
               </TableRow></TableHeader>
               <TableBody>
                 {filtered.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="max-w-xs pl-5 whitespace-normal wrap-anywhere">
-                      <div className="font-medium">{user.username}{user.id === ownId && <span className="ml-2 text-xs text-muted-foreground">Twoje konto</span>}</div>
+                      <div className="font-medium">{user.username}{user.id === ownId && <span className="ml-2 rounded-md bg-muted px-2 py-1 text-xs font-normal text-muted-foreground">Twoje konto</span>}</div>
                       <div className="text-muted-foreground">{user.email}</div>
                     </TableCell>
                     <TableCell className="max-w-xs whitespace-normal wrap-anywhere">{user.role.name}</TableCell>
-                    <TableCell className="hidden max-w-xs whitespace-normal wrap-anywhere sm:table-cell">{user.department?.name ?? '—'}</TableCell>
                     <TableCell><span className={`rounded-md px-2 py-1 text-xs ${user.isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>{user.isActive ? 'Aktywny' : 'Nieaktywny'}</span></TableCell>
                     {(canUpdate || canDelete) && (
                       <TableCell className="pr-5"><div className="flex justify-end gap-1">

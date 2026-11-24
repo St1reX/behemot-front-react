@@ -29,7 +29,7 @@ export function UserEditorDialog({ user, onClose }: { user: ManagedUser | null; 
     resolver: zodResolver(user ? userSchema : createUserSchema),
     defaultValues: {
       username: user?.username ?? '', email: user?.email ?? '', password: '',
-      roleId: user?.roleId ?? '', departmentId: user?.departmentId ?? '', isActive: user?.isActive ?? true,
+      roleId: user?.roleId ?? '', isActive: user?.isActive ?? true,
     },
   })
   const mutation = useMutation({
@@ -54,7 +54,7 @@ export function UserEditorDialog({ user, onClose }: { user: ManagedUser | null; 
         <DialogHeader>
           <DialogTitle>{user ? 'Edytuj użytkownika' : 'Dodaj użytkownika'}</DialogTitle>
           <DialogDescription>
-            {user ? 'Zmień dane, rolę, dział lub status konta.' : 'Ustaw dane i hasło konta. Aktywne konto może od razu się zalogować.'}
+            {user ? 'Zmień dane, rolę lub status konta.' : 'Ustaw dane i hasło konta. Aktywne konto może od razu się zalogować.'}
           </DialogDescription>
         </DialogHeader>
         {options.error ? (
@@ -63,7 +63,7 @@ export function UserEditorDialog({ user, onClose }: { user: ManagedUser | null; 
             <Button type="button" variant="outline" disabled={options.isFetching} onClick={() => { void options.refetch() }}>Ponów odczyt</Button>
           </div>
         ) : options.isPending ? (
-          <div role="status" className="space-y-4"><span className="sr-only">Wczytywanie ról i działów…</span><Skeleton className="h-64 w-full" /></div>
+          <div role="status" className="space-y-4"><span className="sr-only">Wczytywanie ról…</span><Skeleton className="h-64 w-full" /></div>
         ) : (
           <form className="space-y-4" noValidate onSubmit={handleSubmit((values) => mutation.mutate(values))}>
             {fields.map((field) => (
@@ -86,16 +86,6 @@ export function UserEditorDialog({ user, onClose }: { user: ManagedUser | null; 
                 </NativeSelect>
               )} />
               {errors.roleId && <p id="user-role-error" className="text-xs text-destructive">{errors.roleId.message}</p>}
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="user-department" className="text-sm font-medium">Dział</label>
-              <NativeSelect id="user-department" className="w-full" disabled={mutation.isPending}
-                aria-invalid={Boolean(errors.departmentId)} {...register('departmentId')}>
-                <NativeSelectOption value="">Bez działu</NativeSelectOption>
-                {user?.department && !options.data.departments.some(({ id }) => id === user.departmentId) && <NativeSelectOption value={user.department.id} disabled>{user.department.name} (usunięty)</NativeSelectOption>}
-                {options.data.departments.map((department) => <NativeSelectOption key={department.id} value={department.id}>{department.name}</NativeSelectOption>)}
-              </NativeSelect>
-              {errors.departmentId && <p className="text-xs text-destructive">Wybierz prawidłowy dział.</p>}
             </div>
             <Controller name="isActive" control={control} render={({ field }) => (
               <div className="flex items-center gap-2">

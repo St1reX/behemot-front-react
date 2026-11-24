@@ -12,11 +12,11 @@ export const userApiClient = {
     return data
   },
   async create(input: UserInput): Promise<ManagedUser> {
-    const { data } = await apiHttp.post<ManagedUser>('/user', { ...input, departmentId: input.departmentId || null }, { showErrorToast: false })
+    const { data } = await apiHttp.post<ManagedUser>('/user', input, { showErrorToast: false })
     return data
   },
   async update(id: string, { password: _password, ...input }: UserInput): Promise<ManagedUser> {
-    const { data } = await apiHttp.put<ManagedUser>(`/user/${id}`, { ...input, departmentId: input.departmentId || null }, { showErrorToast: false })
+    const { data } = await apiHttp.put<ManagedUser>(`/user/${id}`, input, { showErrorToast: false })
     return data
   },
   async remove(id: string): Promise<void> {

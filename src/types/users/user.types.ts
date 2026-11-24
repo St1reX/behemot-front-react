@@ -9,8 +9,6 @@ export interface ManagedUser {
   email: string
   roleId: string
   role: UserOption
-  departmentId: string | null
-  department: UserOption | null
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -18,5 +16,4 @@ export interface ManagedUser {
 
 export interface UserFormOptions {
   roles: UserOption[]
-  departments: UserOption[]
 }
