@@ -1,4 +1,4 @@
-import { ChevronRight, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pencil, RefreshCw, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,13 @@ import { getVehicleLabel } from '../vehicle.utils'
 
 interface VehicleListProps {
   records: VehicleRecord[]
+  page: number
+  pageSize: number
+  total: number | undefined
+  search: string
+  isGeneration: boolean
+  onPageChange: (page: number) => void
+  onSearch: (search: string) => void
   isPending: boolean
   isFetching: boolean
   error: Error | null
@@ -25,30 +32,35 @@ interface VehicleListProps {
 
 export function VehicleList({
   records, isPending, isFetching, error, onRefresh, onEdit, onDelete,
+  page, pageSize, total, search, isGeneration, onPageChange, onSearch,
 }: VehicleListProps) {
-  const [search, setSearch] = useState('')
+  const [draftSearch, setDraftSearch] = useState('')
   const { requirePrivilege } = useAccess()
-  const searchPhrase = search.trim().toLocaleLowerCase('pl-PL')
-  const filtered = records.filter((record) =>
-    getVehicleLabel(record).toLocaleLowerCase('pl-PL').includes(searchPhrase),
-  )
+  const totalPages = Math.max(1, Math.ceil((total ?? 0) / pageSize))
 
   return (
     <Card className="gap-0 py-0">
       <CardContent className="p-0">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
-          <div className="relative w-full sm:max-w-xs">
-            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              aria-label="Szukaj na liście"
-              placeholder="Szukaj na tej liście…"
-              className="pl-9"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-          </div>
+          <form className="flex w-full items-center gap-2 sm:max-w-md" onSubmit={(event) => {
+            event.preventDefault()
+            onSearch(draftSearch.trim())
+          }}>
+            <div className="relative min-w-0 flex-1">
+              <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label={isGeneration ? 'Szukaj po roku początku lub końca produkcji albo wpisz obecnie' : 'Szukaj po nazwie'}
+                placeholder={isGeneration ? 'Rok początku / końca lub „obecnie”…' : 'Szukaj po nazwie…'}
+                maxLength={100}
+                className="pl-9"
+                value={draftSearch}
+                onChange={(event) => setDraftSearch(event.target.value)}
+              />
+            </div>
+            <Button type="submit" variant="outline" size="sm">Szukaj</Button>
+          </form>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            {!isPending && !error && <span>Wyniki: {filtered.length} / {records.length}</span>}
+            {!isPending && !error && total !== undefined && <span>Wyniki: {total}</span>}
             <Button type="button" variant="outline" size="sm" disabled={isFetching} onClick={onRefresh}>
               <RefreshCw aria-hidden="true" className={isFetching ? 'animate-spin motion-reduce:animate-none' : undefined} />
               Odśwież
@@ -66,9 +78,9 @@ export function VehicleList({
               <Skeleton key={index} aria-hidden="true" className="h-10 w-full" />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : records.length === 0 ? (
           <p role="status" className="p-10 text-center text-sm text-muted-foreground">
-            {records.length === 0 ? 'Na tym poziomie nie ma jeszcze żadnych elementów.' : 'Brak wyników dla podanej frazy.'}
+            {search ? 'Brak wyników dla podanej frazy.' : 'Na tym poziomie nie ma jeszcze żadnych elementów.'}
           </p>
         ) : (
           <Table>
@@ -81,7 +93,7 @@ export function VehicleList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((record) => {
+              {records.map((record) => {
                 const label = getVehicleLabel(record)
                 const entity = VEHICLE_ENTITIES[record.type]
                 const canOpen = record.type === 'brand'
@@ -148,6 +160,17 @@ export function VehicleList({
             </TableBody>
           </Table>
         )}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t px-5 py-4 text-xs text-muted-foreground">
+          <span>{total !== undefined ? `Strona ${page} z ${totalPages} · ${pageSize} wpisów na stronę` : `Strona ${page}`}</span>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" disabled={page === 1 || isFetching} onClick={() => onPageChange(page - 1)}>
+              <ChevronLeft aria-hidden="true" />Poprzednia
+            </Button>
+            <Button type="button" variant="outline" size="sm" disabled={total === undefined || page >= totalPages || isFetching} onClick={() => onPageChange(page + 1)}>
+              Następna<ChevronRight aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

@@ -1,13 +1,17 @@
 import { apiHttp } from '@/api/http'
 import type { VehicleNameInput } from '@/types/vehicles/vehicle.schema'
 import type {
-  CarBrand, CarModel, CarGeneration, CarModelInput, CarGenerationInput,
+  CarBrand, CarModel, CarGeneration, CarModelInput, CarGenerationInput, VehicleListQuery, VehiclePage,
 } from '@/types/vehicles/vehicle.types'
 
 export const vehicleApiClient = {
   brands: {
-    async list(signal?: AbortSignal): Promise<CarBrand[]> {
-      const { data } = await apiHttp.get<CarBrand[]>('/car-brand', { signal, showErrorToast: false })
+    async list(params: VehicleListQuery, signal?: AbortSignal): Promise<VehiclePage<CarBrand>> {
+      const { data } = await apiHttp.get<VehiclePage<CarBrand>>('/car-brand', { params, signal, showErrorToast: false })
+      return data
+    },
+    async get(id: string, signal?: AbortSignal): Promise<CarBrand> {
+      const { data } = await apiHttp.get<CarBrand>(`/car-brand/${id}`, { signal, showErrorToast: false })
       return data
     },
     async create(input: VehicleNameInput): Promise<CarBrand> {
@@ -23,8 +27,12 @@ export const vehicleApiClient = {
     },
   },
   models: {
-    async listByBrand(brandId: string, signal?: AbortSignal): Promise<CarModel[]> {
-      const { data } = await apiHttp.get<CarModel[]>(`/car-model/brand/${brandId}`, { signal, showErrorToast: false })
+    async listByBrand(brandId: string, params: VehicleListQuery, signal?: AbortSignal): Promise<VehiclePage<CarModel>> {
+      const { data } = await apiHttp.get<VehiclePage<CarModel>>(`/car-model/brand/${brandId}`, { params, signal, showErrorToast: false })
+      return data
+    },
+    async get(id: string, signal?: AbortSignal): Promise<CarModel> {
+      const { data } = await apiHttp.get<CarModel>(`/car-model/${id}`, { signal, showErrorToast: false })
       return data
     },
     async create(input: CarModelInput): Promise<CarModel> {
@@ -40,8 +48,8 @@ export const vehicleApiClient = {
     },
   },
   generations: {
-    async listByModel(modelId: string, signal?: AbortSignal): Promise<CarGeneration[]> {
-      const { data } = await apiHttp.get<CarGeneration[]>(`/car-generation/model/${modelId}`, { signal, showErrorToast: false })
+    async listByModel(modelId: string, params: VehicleListQuery, signal?: AbortSignal): Promise<VehiclePage<CarGeneration>> {
+      const { data } = await apiHttp.get<VehiclePage<CarGeneration>>(`/car-generation/model/${modelId}`, { params, signal, showErrorToast: false })
       return data
     },
     async create(input: CarGenerationInput): Promise<CarGeneration> {

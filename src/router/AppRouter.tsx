@@ -5,7 +5,14 @@ import { authRoutes } from './routes/auth.routes'
 import { errorRoutes } from './routes/errors.routes'
 import { generalRoutes } from './routes/general.routes'
 
-const router = createBrowserRouter([...generalRoutes, ...authRoutes, ...errorRoutes], {
+function RouterLoading() {
+  return <main className="grid min-h-dvh place-content-center"><p role="status">Wczytywanie strony…</p></main>
+}
+
+const router = createBrowserRouter([{
+  HydrateFallback: RouterLoading,
+  children: [...generalRoutes, ...authRoutes, ...errorRoutes],
+}], {
   basename: appConfig.routerBaseUrl,
 })
 

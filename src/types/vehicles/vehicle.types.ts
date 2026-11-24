@@ -1,3 +1,16 @@
+export interface VehicleListQuery {
+  page: number
+  pageSize: number
+  search?: string
+}
+
+export interface VehiclePage<T> {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
 export interface CarBrand {
   id: string
   name: string

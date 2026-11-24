@@ -1,15 +1,5 @@
 import type { RouteObject } from 'react-router'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { HomePage } from '@/pages/home/HomePage'
-import { AuditLogsPage } from '@/pages/audit-logs/AuditLogsPage'
-import { ContractorsPage } from '@/pages/contractors/ContractorsPage'
-import { ProducersPage } from '@/pages/producers/ProducersPage'
-import { ProductListingTemplatesPage } from '@/pages/product-listing-templates/ProductListingTemplatesPage'
-import { ProductListingTemplateEditorPage } from '@/pages/product-listing-templates/ProductListingTemplateEditorPage'
-import { VehiclesPage } from '@/pages/vehicles/VehiclesPage'
-import { WarehousesPage } from '@/pages/warehouses/WarehousesPage'
-import { RolesPage } from '@/pages/roles/RolesPage'
-import { UsersPage } from '@/pages/users/UsersPage'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
 import { RequireAuth, RequirePrivilege } from '../guards'
@@ -21,45 +11,45 @@ export const generalRoutes: RouteObject[] = [
       {
         element: <AppLayout />,
         children: [
-          { path: '/', element: <HomePage /> },
+          { path: '/', lazy: async () => ({ Component: (await import('@/pages/home/HomePage')).HomePage }) },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.USER}:${ACTIONS.READ}`} />,
-            children: [{ path: '/users', element: <UsersPage /> }],
+            children: [{ path: '/users', lazy: async () => ({ Component: (await import('@/pages/users/UsersPage')).UsersPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.ROLE}:${ACTIONS.READ}`} />,
-            children: [{ path: '/roles', element: <RolesPage /> }],
+            children: [{ path: '/roles', lazy: async () => ({ Component: (await import('@/pages/roles/RolesPage')).RolesPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.AUDIT_LOG}:${ACTIONS.READ}`} />,
-            children: [{ path: '/audit-logs', element: <AuditLogsPage /> }],
+            children: [{ path: '/audit-logs', lazy: async () => ({ Component: (await import('@/pages/audit-logs/AuditLogsPage')).AuditLogsPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.CAR_BRAND}:${ACTIONS.READ}`} />,
-            children: [{ path: '/vehicles', element: <VehiclesPage /> }],
+            children: [{ path: '/vehicles', lazy: async () => ({ Component: (await import('@/pages/vehicles/VehiclesPage')).VehiclesPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.CONTRACTOR}:${ACTIONS.READ}`} />,
-            children: [{ path: '/contractors', element: <ContractorsPage /> }],
+            children: [{ path: '/contractors', lazy: async () => ({ Component: (await import('@/pages/contractors/ContractorsPage')).ContractorsPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCER}:${ACTIONS.READ}`} />,
-            children: [{ path: '/producers', element: <ProducersPage /> }],
+            children: [{ path: '/producers', lazy: async () => ({ Component: (await import('@/pages/producers/ProducersPage')).ProducersPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.WAREHOUSE}:${ACTIONS.READ}`} />,
-            children: [{ path: '/warehouses', element: <WarehousesPage /> }],
+            children: [{ path: '/warehouses', lazy: async () => ({ Component: (await import('@/pages/warehouses/WarehousesPage')).WarehousesPage }) }],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.READ}`} />,
             children: [
-              { path: '/listing-templates', element: <ProductListingTemplatesPage /> },
-              { path: '/listing-templates/:id', element: <ProductListingTemplateEditorPage /> },
+              { path: '/listing-templates', lazy: async () => ({ Component: (await import('@/pages/product-listing-templates/ProductListingTemplatesPage')).ProductListingTemplatesPage }) },
+              { path: '/listing-templates/:id', lazy: async () => ({ Component: (await import('@/pages/product-listing-templates/ProductListingTemplateEditorPage')).ProductListingTemplateEditorPage }) },
             ],
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.CREATE}`} />,
-            children: [{ path: '/listing-templates/new', element: <ProductListingTemplateEditorPage /> }],
+            children: [{ path: '/listing-templates/new', lazy: async () => ({ Component: (await import('@/pages/product-listing-templates/ProductListingTemplateEditorPage')).ProductListingTemplateEditorPage }) }],
           },
         ],
       },

@@ -1,9 +1,11 @@
-import { Outlet } from 'react-router'
+import { Outlet, useNavigation } from 'react-router'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppSidebar } from './AppSidebar'
 
 export function AppLayout() {
+  const navigation = useNavigation()
+
   return (
     <TooltipProvider>
       <SidebarProvider className="font-sans">
@@ -19,6 +21,7 @@ export function AppLayout() {
             <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
               <SidebarTrigger title="Zwiń lub rozwiń nawigację" />
               <span>Panel zarządzania</span>
+              {navigation.state === 'loading' && <span role="status" className="ml-auto">Wczytywanie strony…</span>}
             </div>
             <Outlet />
           </div>
