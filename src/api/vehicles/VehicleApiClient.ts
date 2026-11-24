@@ -6,6 +6,10 @@ import type {
 
 export const vehicleApiClient = {
   brands: {
+    async all(signal?: AbortSignal): Promise<CarBrand[]> {
+      const { data } = await apiHttp.get<CarBrand[]>('/car-brand', { signal, showErrorToast: false })
+      return data
+    },
     async list(params: VehicleListQuery, signal?: AbortSignal): Promise<VehiclePage<CarBrand>> {
       const { data } = await apiHttp.get<VehiclePage<CarBrand>>('/car-brand', { params, signal, showErrorToast: false })
       return data
@@ -27,6 +31,10 @@ export const vehicleApiClient = {
     },
   },
   models: {
+    async allByBrand(brandId: string, signal?: AbortSignal): Promise<CarModel[]> {
+      const { data } = await apiHttp.get<CarModel[]>(`/car-model/brand/${brandId}`, { signal, showErrorToast: false })
+      return data
+    },
     async listByBrand(brandId: string, params: VehicleListQuery, signal?: AbortSignal): Promise<VehiclePage<CarModel>> {
       const { data } = await apiHttp.get<VehiclePage<CarModel>>(`/car-model/brand/${brandId}`, { params, signal, showErrorToast: false })
       return data
@@ -48,6 +56,10 @@ export const vehicleApiClient = {
     },
   },
   generations: {
+    async allByModel(modelId: string, signal?: AbortSignal): Promise<CarGeneration[]> {
+      const { data } = await apiHttp.get<CarGeneration[]>(`/car-generation/model/${modelId}`, { signal, showErrorToast: false })
+      return data
+    },
     async listByModel(modelId: string, params: VehicleListQuery, signal?: AbortSignal): Promise<VehiclePage<CarGeneration>> {
       const { data } = await apiHttp.get<VehiclePage<CarGeneration>>(`/car-generation/model/${modelId}`, { params, signal, showErrorToast: false })
       return data

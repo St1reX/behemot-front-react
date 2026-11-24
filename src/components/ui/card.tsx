@@ -39,6 +39,10 @@ function CardDescription({ className, ...props }: ComponentProps<"p">) {
   )
 }
 
+function CardTitle({ className, ...props }: ComponentProps<"h2">) {
+  return <h2 data-slot="card-title" className={cn("font-semibold leading-none", className)} {...props} />
+}
+
 function CardContent({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
@@ -49,4 +53,4 @@ function CardContent({ className, ...props }: ComponentProps<"div">) {
   )
 }
 
-export { Card, CardHeader, CardDescription, CardContent }
+export { Card, CardHeader, CardTitle, CardDescription, CardContent }

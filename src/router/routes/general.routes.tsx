@@ -11,6 +11,21 @@ export const generalRoutes: RouteObject[] = [
       {
         element: <AppLayout />,
         children: [
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT}:${ACTIONS.READ}`} />,
+            children: [
+              { path: '/products', lazy: async () => ({ Component: (await import('@/pages/products/ProductsPage')).ProductsPage }) },
+              { path: '/products/:id', lazy: async () => ({ Component: (await import('@/pages/products/ProductDetailsPage')).ProductDetailsPage }) },
+              {
+                element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT}:${ACTIONS.UPDATE}`} />,
+                children: [{ path: '/products/:id/edit', lazy: async () => ({ Component: (await import('@/pages/products/ProductEditorPage')).ProductEditorPage }) }],
+              },
+            ],
+          },
+          {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.PRODUCT}:${ACTIONS.CREATE}`} />,
+            children: [{ path: '/products/new', lazy: async () => ({ Component: (await import('@/pages/products/ProductEditorPage')).ProductEditorPage }) }],
+          },
           { path: '/', lazy: async () => ({ Component: (await import('@/pages/home/HomePage')).HomePage }) },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.USER}:${ACTIONS.READ}`} />,
