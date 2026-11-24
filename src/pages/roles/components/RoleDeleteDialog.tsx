@@ -13,7 +13,11 @@ export function RoleDeleteDialog({ role, onClose }: {
     mutationFn: () => roleApiClient.remove(role.id),
     retry: false,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['roles'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['roles'] }),
+        queryClient.invalidateQueries({ queryKey: ['users'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-form-options'] }),
+      ])
       toast.add({ type: 'success', title: 'Element został usunięty.' })
       onClose()
     },

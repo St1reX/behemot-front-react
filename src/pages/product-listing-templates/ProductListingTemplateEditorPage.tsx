@@ -2,9 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Editor } from '@tiptap/core'
 import { ArrowLeft, Eye, Save } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
-import { useBeforeUnload, useNavigate, useParams } from 'react-router'
+import { useBlocker, useNavigate, useParams } from 'react-router'
 import { z } from 'zod'
 import { departmentApiClient } from '@/api/departments/DepartmentApiClient'
 import { ApiError } from '@/api/errors'
@@ -29,6 +29,18 @@ import { TemplatePreview } from './components/TemplatePreview'
 import { LISTING_FIELD_LABELS } from './listingTemplate.utils'
 import './listing-template.css'
 
+function getTemplateValues(template?: ProductListingTemplate): ProductListingTemplateInput {
+  return template ? {
+    name: template.name, departmentId: template.department.id,
+    titleTemplate: template.titleTemplate, summaryTemplate: template.summaryTemplate, descriptionTemplate: template.descriptionTemplate,
+  } : {
+    name: '', departmentId: '',
+    titleTemplate: '{{customName}} {{carBrand}} {{carModel}} {{productionYears}} {{sideTitleLabel}}',
+    summaryTemplate: '<p><strong>{{producer}}</strong> · SKU: {{sku}}</p>',
+    descriptionTemplate: '<h2>{{customName}}</h2><p>Część do pojazdu <strong>{{carGeneration}}</strong>.</p><ul><li>Producent: {{producer}}</li><li>Strona: {{sideLabel}}</li><li>SKU: {{sku}}</li></ul><p>Przed zakupem sprawdź dopasowanie części do swojego pojazdu.</p>',
+  }
+}
+
 export function ProductListingTemplateEditorPage() {
   const { id } = useParams()
   const { requirePrivilege } = useAccess()
@@ -40,6 +52,9 @@ export function ProductListingTemplateEditorPage() {
     queryFn: ({ signal }) => productListingTemplateApiClient.get(id!, signal),
     enabled: Boolean(id) && validId,
     retry: false,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
   const placeholders = useQuery({
     queryKey: ['listing-template-placeholders'],
@@ -53,10 +68,10 @@ export function ProductListingTemplateEditorPage() {
     enabled: canEdit && canReadDepartments,
     retry: false,
   })
-  const error = (id && !template.data ? template.error : null)
+  const error = (id ? template.error : null)
     ?? (!placeholders.data ? placeholders.error : null)
     ?? (canEdit && canReadDepartments && !departments.data ? departments.error : null)
-  const loading = (Boolean(id) && template.isPending) || placeholders.isPending
+  const loading = (Boolean(id) && (template.isPending || !template.isFetchedAfterMount)) || placeholders.isPending
     || (canEdit && canReadDepartments && departments.isPending)
 
   if (!validId) return <p role="alert">Niepoprawny identyfikator szablonu.</p>
@@ -91,19 +106,11 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const activeEditor = useRef<Editor | null>(null)
+  const hasSaved = useRef(false)
   const [activeField, setActiveField] = useState<ListingTemplateField | null>(null)
-  const [discarding, setDiscarding] = useState(false)
   const { register, control, handleSubmit, setError, reset, formState: { errors, isDirty } } = useForm<ProductListingTemplateInput>({
     resolver: zodResolver(productListingTemplateSchema),
-    defaultValues: template ? {
-      name: template.name, departmentId: template.department.id,
-      titleTemplate: template.titleTemplate, summaryTemplate: template.summaryTemplate, descriptionTemplate: template.descriptionTemplate,
-    } : {
-      name: '', departmentId: '',
-      titleTemplate: '{{customName}} {{carBrand}} {{carModel}} {{productionYears}} {{sideTitleLabel}}',
-      summaryTemplate: '<p><strong>{{producer}}</strong> · SKU: {{sku}}</p>',
-      descriptionTemplate: '<h2>{{customName}}</h2><p>Część do pojazdu <strong>{{carGeneration}}</strong>.</p><ul><li>Producent: {{producer}}</li><li>Strona: {{sideLabel}}</li><li>SKU: {{sku}}</li></ul><p>Przed zakupem sprawdź dopasowanie części do swojego pojazdu.</p>',
-    },
+    defaultValues: getTemplateValues(template),
   })
   const [titleTemplate, summaryTemplate, descriptionTemplate] = useWatch({ control, name: ['titleTemplate', 'summaryTemplate', 'descriptionTemplate'] })
   const mutation = useMutation({
@@ -114,6 +121,7 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
     onSuccess: async (_saved, values) => {
       await queryClient.invalidateQueries({ queryKey: ['product-listing-templates'] })
       reset(values)
+      hasSaved.current = true
       toast.add({ type: 'success', title: 'Szablon został zapisany.' })
       void navigate('/listing-templates')
     },
@@ -127,8 +135,15 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
       }
     },
   })
-  useBeforeUnload((event) => {
-    if (canEdit && isDirty) { event.preventDefault(); event.returnValue = '' }
+  useEffect(() => {
+    if (template && !isDirty && !mutation.isPending) {
+      reset(getTemplateValues(template))
+    }
+  }, [template, isDirty, mutation.isPending, reset])
+
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    return canEdit && isDirty && !hasSaved.current
+      && (currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search)
   })
   const disabled = !canEdit || mutation.isPending
   const departmentOptions = template && !departments.some((department) => department.id === template.department.id)
@@ -147,10 +162,9 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
       <PageHeader title={template ? canEdit ? 'Edytuj szablon' : 'Podgląd szablonu' : 'Nowy szablon ogłoszenia'}
         description="Połącz własną treść z danymi produktu. Zmienne zostaną uzupełnione podczas generowania ogłoszenia."
         actions={<div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => {
-            if (canEdit && isDirty) setDiscarding(true)
-            else void navigate('/listing-templates')
-          }}><ArrowLeft aria-hidden="true" />Wróć do listy</Button>
+          <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => { void navigate('/listing-templates') }}>
+            <ArrowLeft aria-hidden="true" />Wróć do listy
+          </Button>
           <Dialog>
             <DialogTrigger render={<Button type="button" variant="outline" />}>
               <Eye aria-hidden="true" />Podgląd ogłoszenia
@@ -203,7 +217,7 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
           </fieldset>
           {(Object.keys(LISTING_FIELD_LABELS) as ListingTemplateField[]).map((name) => (
             <Controller key={name} name={name} control={control} render={({ field, fieldState }) => (
-              <TemplateFieldEditor id={name} label={LISTING_FIELD_LABELS[name]} initialValue={field.value}
+              <TemplateFieldEditor id={name} label={LISTING_FIELD_LABELS[name]} value={field.value}
                 placeholders={placeholders} richText={name !== 'titleTemplate'} disabled={disabled}
                 active={activeField === name} error={fieldState.error?.message} onChange={field.onChange} onBlur={field.onBlur}
                 onFocus={(editor) => { activeEditor.current = editor; setActiveField(name) }} />
@@ -215,8 +229,10 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
             activeLabel={activeField ? LISTING_FIELD_LABELS[activeField] : null} onInsert={insertPlaceholder} />
         </aside>
       </div>
-      <ConfirmDialog open={discarding} title="Odrzucić niezapisane zmiany?" description="Zmiany w tym szablonie nie zostały zapisane."
-        confirmLabel="Odrzuć zmiany" variant="destructive" onOpenChange={setDiscarding} onConfirm={() => { void navigate('/listing-templates') }} />
+      <ConfirmDialog open={blocker.state === 'blocked'} title="Odrzucić niezapisane zmiany?" description="Zmiany w tym szablonie nie zostały zapisane."
+        confirmLabel="Odrzuć zmiany" variant="destructive" isPending={mutation.isPending}
+        onOpenChange={(open) => { if (!open && blocker.state === 'blocked') blocker.reset() }}
+        onConfirm={() => { if (blocker.state === 'blocked') blocker.proceed() }} />
     </div>
   )
 }

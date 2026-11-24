@@ -39,7 +39,11 @@ export function RoleEditorDialog({ role, readOnly, isOwnRole, onClose }: {
       : roleApiClient.create(values),
     retry: false,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['roles'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['roles'] }),
+        queryClient.invalidateQueries({ queryKey: ['users'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-form-options'] }),
+      ])
       toast.add({ type: 'success', title: 'Rola została zapisana.' })
       onClose()
     },

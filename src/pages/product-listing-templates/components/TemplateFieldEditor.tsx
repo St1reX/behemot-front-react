@@ -2,7 +2,7 @@ import { Node, type Editor } from '@tiptap/core'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Bold, Italic, Heading2, Heading3, List, ListOrdered, Undo2, Redo2, Underline } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ListingPlaceholder } from '@/types/product-listing-templates/productListingTemplate.types'
@@ -14,7 +14,7 @@ const singleLineDocument = Node.create({ name: 'doc', topNode: true, content: 'p
 interface TemplateFieldEditorProps {
   id: string
   label: string
-  initialValue: string
+  value: string
   placeholders: ListingPlaceholder[]
   richText?: boolean
   disabled?: boolean
@@ -26,10 +26,11 @@ interface TemplateFieldEditorProps {
 }
 
 export function TemplateFieldEditor({
-  id, label, initialValue, placeholders, richText = false, disabled = false,
+  id, label, value, placeholders, richText = false, disabled = false,
   active, error, onChange, onBlur, onFocus,
 }: TemplateFieldEditorProps) {
-  const [initialContent] = useState(() => toEditorHtml(initialValue, richText))
+  const [initialContent] = useState(() => toEditorHtml(value, richText))
+  const editorValue = useRef(value)
   const extensions = useMemo(() => [
     StarterKit.configure({
       document: richText ? undefined : false,
@@ -72,12 +73,24 @@ export function TemplateFieldEditor({
       handleKeyDown: (_view, event) => !richText && event.key === 'Enter',
       transformPastedText: (text) => richText ? text : text.replace(/[\r\n]+/g, ' '),
     },
-    onUpdate: ({ editor: current }) => onChange(current.isEmpty ? '' : richText ? serializeTemplateHtml(current.getHTML()) : current.getText({ blockSeparator: ' ' })),
+    onUpdate: ({ editor: current }) => {
+      const nextValue = current.isEmpty ? '' : richText
+        ? serializeTemplateHtml(current.getHTML())
+        : current.getText({ blockSeparator: ' ' })
+      editorValue.current = nextValue
+      onChange(nextValue)
+    },
     onFocus: ({ editor: current }) => onFocus(current),
     onBlur,
   })
 
   useEffect(() => { editor?.setEditable(!disabled, false) }, [editor, disabled])
+  useEffect(() => {
+    if (editor && editorValue.current !== value) {
+      editor.commands.setContent(toEditorHtml(value, richText), { emitUpdate: false })
+      editorValue.current = value
+    }
+  }, [editor, value, richText])
   const tools = editor ? [
     { label: 'Pogrubienie', icon: Bold, active: editor.isActive('bold'), run: () => editor.chain().focus().toggleBold().run() },
     { label: 'Kursywa', icon: Italic, active: editor.isActive('italic'), run: () => editor.chain().focus().toggleItalic().run() },
