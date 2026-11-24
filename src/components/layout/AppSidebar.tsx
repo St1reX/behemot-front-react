@@ -1,4 +1,4 @@
-import { CarFront, Factory, FileText, Handshake, History, LayoutDashboard, ShieldCheck, Warehouse } from 'lucide-react'
+import { CarFront, Factory, FileText, Handshake, History, LayoutDashboard, ShieldCheck, Users, Warehouse } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation } from 'react-router'
 import behemotLogo from '@/assets/images/behemot-logo.jpeg'
@@ -35,6 +35,7 @@ const navigationGroups: { label: string; items: { title: string; to: string; ico
     label: 'Administracja',
     items: [
       { title: 'Role i uprawnienia', to: '/roles', icon: ShieldCheck, privilege: `${ENTITIES.ROLE}:${ACTIONS.READ}` },
+      { title: 'Użytkownicy', to: '/users', icon: Users, privilege: `${ENTITIES.USER}:${ACTIONS.READ}` },
     ],
   },
 ]
