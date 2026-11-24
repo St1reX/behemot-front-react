@@ -2,9 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { userApiClient } from '@/api/users/UserApiClient'
+import { FormActions } from '@/components/common/FormActions'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -95,11 +96,7 @@ export function UserEditorDialog({ user, onClose }: { user: ManagedUser | null; 
               </div>
             )} />
             {isOwn && <p className="text-xs text-muted-foreground">Nie możesz zmienić własnej roli ani dezaktywować swojego konta.</p>}
-            {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
-            <DialogFooter>
-              <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onClose}>Anuluj</Button>
-              <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? 'Zapisywanie…' : 'Zapisz'}</Button>
-            </DialogFooter>
+            <FormActions isPending={mutation.isPending} error={mutation.error?.message} onCancel={onClose} />
           </form>
         )}
       </DialogContent>

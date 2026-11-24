@@ -3,9 +3,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { vehicleApiClient } from '@/api/vehicles/VehicleApiClient'
-import { Button } from '@/components/ui/button'
+import { FormActions, type FormActionsProps } from '@/components/common/FormActions'
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/lib/toast'
@@ -17,24 +17,6 @@ type SaveRequest =
   | { type: 'brand'; id?: string; data: VehicleNameInput }
   | { type: 'model'; id?: string; data: CarModelInput }
   | { type: 'generation'; id?: string; data: CarGenerationInput }
-
-interface FormActionsProps {
-  isPending: boolean
-  error: string | undefined
-  onCancel: () => void
-}
-
-function FormActions({ isPending, error, onCancel }: FormActionsProps) {
-  return (
-    <>
-      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={isPending} onClick={onCancel}>Anuluj</Button>
-        <Button type="submit" disabled={isPending}>{isPending ? 'Zapisywanie…' : 'Zapisz'}</Button>
-      </DialogFooter>
-    </>
-  )
-}
 
 function NameForm({ initialName, onSubmit, ...actions }: FormActionsProps & {
   initialName: string

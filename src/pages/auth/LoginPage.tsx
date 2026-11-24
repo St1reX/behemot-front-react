@@ -1,5 +1,6 @@
 import { LockKeyhole, UserRound } from 'lucide-react';
 import { Link } from 'react-router';
+import { FormActions } from '@/components/common/FormActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthLayout } from './components/AuthLayout';
@@ -78,13 +79,9 @@ export function LoginPage() {
                   {errors.root.login.message}
                </p>
             )}
-            <Button
-               className="mt-2 h-11 w-full shadow-sm"
-               type="submit"
-               disabled={isSubmitting || hasExistingSession}
-            >
-               {isSubmitting ? 'Logowanie…' : 'Zaloguj się'}
-            </Button>
+            <FormActions layout="inline" className="block" isPending={isSubmitting}
+               submitLabel="Zaloguj się" pendingLabel="Logowanie…" submitDisabled={hasExistingSession}
+               submitProps={{ className: 'mt-2 h-11 w-full shadow-sm' }} />
          </form>
 
          {hasExistingSession && (

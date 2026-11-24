@@ -1,5 +1,6 @@
 import { RotateCcw, Search, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
+import { FormActions } from '@/components/common/FormActions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -69,7 +70,9 @@ export function AuditLogFilters({ onApply }: { onApply: (filters: Filters) => vo
           </div>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
             <p className="text-xs text-muted-foreground">Wybierz kryteria i zastosuj filtry.</p>
-            <div className="flex gap-2"><Button type="reset" variant="ghost" size="sm"><RotateCcw aria-hidden="true" />Wyczyść</Button><Button type="submit" size="sm"><Search aria-hidden="true" />Zastosuj filtry</Button></div>
+            <FormActions layout="inline" submitLabel={<><Search aria-hidden="true" />Zastosuj filtry</>} submitProps={{ size: 'sm' }}>
+              <Button type="reset" variant="ghost" size="sm"><RotateCcw aria-hidden="true" />Wyczyść</Button>
+            </FormActions>
           </div>
         </form>
       </CardContent>

@@ -2,9 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { warehouseApiClient } from '@/api/warehouses/WarehouseApiClient'
-import { Button } from '@/components/ui/button'
+import { FormActions } from '@/components/common/FormActions'
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/lib/toast'
@@ -71,11 +71,7 @@ export function WarehouseEditorDialog({ warehouse, onClose }: {
               )}
             </div>
           ))}
-          {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
-          <DialogFooter>
-            <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onClose}>Anuluj</Button>
-            <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? 'Zapisywanie…' : 'Zapisz'}</Button>
-          </DialogFooter>
+          <FormActions isPending={mutation.isPending} error={mutation.error?.message} onCancel={onClose} />
         </form>
       </DialogContent>
     </Dialog>

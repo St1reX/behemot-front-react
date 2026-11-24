@@ -1,6 +1,6 @@
 import { LockKeyhole, Mail, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
-import { Button } from '@/components/ui/button'
+import { FormActions } from '@/components/common/FormActions'
 import { Input } from '@/components/ui/input'
 import { AuthLayout } from './components/AuthLayout'
 import { useRegisterForm } from './hooks/useRegisterForm'
@@ -97,9 +97,9 @@ export function RegisterPage() {
           {errors.root?.register && (
             <p role="alert" className="text-destructive">{errors.root.register.message}</p>
           )}
-          <Button className="mt-2 h-11 w-full shadow-sm" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Rejestrowanie…' : 'Zarejestruj się'}
-          </Button>
+          <FormActions layout="inline" className="block" isPending={isSubmitting}
+            submitLabel="Zarejestruj się" pendingLabel="Rejestrowanie…"
+            submitProps={{ className: 'mt-2 h-11 w-full shadow-sm' }} />
         </form>
       )}
       <p className="mt-6 text-center text-sm text-muted-foreground">

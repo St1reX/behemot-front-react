@@ -2,8 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { roleApiClient } from '@/api/roles/RoleApiClient'
+import { FormActions } from '@/components/common/FormActions'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/lib/toast'
@@ -129,11 +130,8 @@ function RoleEditorForm({ role, privileges, readOnly, isPending, error, onSubmit
         render={({ field }) => <RolePrivilegesMatrix privileges={privileges} value={field.value} onChange={field.onChange} disabled={readOnly || isPending} />}
       />
       {errors.privilegeIds && <p role="alert" className="text-sm text-destructive">Nieprawidłowy wybór uprawnień. Otwórz formularz ponownie.</p>}
-      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={isPending} onClick={onClose}>{readOnly ? 'Zamknij' : 'Anuluj'}</Button>
-        {!readOnly && <Button type="submit" disabled={isPending}>{isPending ? 'Zapisywanie…' : 'Zapisz'}</Button>}
-      </DialogFooter>
+      <FormActions isPending={isPending} error={error} onCancel={onClose}
+        cancelLabel={readOnly ? 'Zamknij' : 'Anuluj'} showSubmit={!readOnly} />
     </form>
   )
 }

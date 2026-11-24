@@ -10,6 +10,7 @@ import { departmentApiClient } from '@/api/departments/DepartmentApiClient'
 import { ApiError } from '@/api/errors'
 import { productListingTemplateApiClient } from '@/api/product-listing-templates/ProductListingTemplateApiClient'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+import { FormActions } from '@/components/common/FormActions'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -162,10 +163,13 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
     <div className="space-y-6">
       <PageHeader title={template ? canEdit ? 'Edytuj szablon' : 'Podgląd szablonu' : 'Nowy szablon ogłoszenia'}
         description="Połącz własną treść z danymi produktu. Zmienne zostaną uzupełnione podczas generowania ogłoszenia."
-        actions={<div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => { void navigate('/listing-templates') }}>
-            <ArrowLeft aria-hidden="true" />Wróć do listy
-          </Button>
+        actions={<FormActions layout="inline" isPending={mutation.isPending}
+          onCancel={() => { void navigate('/listing-templates') }}
+          cancelLabel={<><ArrowLeft aria-hidden="true" />Wróć do listy</>}
+          showSubmit={canEdit} submitDisabled={noDepartmentAvailable}
+          submitLabel={<><Save aria-hidden="true" />Zapisz szablon</>}
+          pendingLabel={<><Save aria-hidden="true" />Zapisywanie…</>}
+          submitProps={{ form: 'listing-template-form' }}>
           <Dialog>
             <DialogTrigger render={<Button type="button" variant="outline" />}>
               <Eye aria-hidden="true" />Podgląd ogłoszenia
@@ -180,10 +184,7 @@ function TemplateForm({ template, placeholders, departments, canEdit, canReadDep
               <TemplatePreview content={{ titleTemplate, summaryTemplate, descriptionTemplate }} />
             </DialogContent>
           </Dialog>
-          {canEdit && <Button type="submit" form="listing-template-form" disabled={mutation.isPending || noDepartmentAvailable}>
-            <Save aria-hidden="true" />{mutation.isPending ? 'Zapisywanie…' : 'Zapisz szablon'}
-          </Button>}
-        </div>}
+        </FormActions>}
       />
       {mutation.error && <p role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm whitespace-pre-wrap text-destructive">{mutation.error.message}</p>}
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">

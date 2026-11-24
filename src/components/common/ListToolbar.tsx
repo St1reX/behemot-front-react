@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { FormActions } from './FormActions'
 
 interface ListToolbarProps {
   search?: {
@@ -40,7 +41,7 @@ export function ListToolbar({ search, summary, isFetching, onRefresh, children, 
                 onChange={(event) => search.onChange(event.target.value)}
               />
             </div>
-            {search.onSubmit && <Button type="submit" variant="outline" size="sm">Szukaj</Button>}
+            {search.onSubmit && <FormActions layout="inline" submitLabel="Szukaj" submitProps={{ variant: 'outline', size: 'sm' }} />}
           </form>
         )}
         {children}
