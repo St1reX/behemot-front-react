@@ -18,7 +18,8 @@ export const ENTITIES = {
 
 export type Entity = (typeof ENTITIES)[keyof typeof ENTITIES]
 
-export const ENTITY_LABELS: Record<Exclude<Entity, 'AUDIT_LOG'>, string> = {
+export const ENTITY_LABELS: Record<Entity, string> = {
+  AUDIT_LOG: 'Logi audytowe',
   USER: 'Użytkownik',
   REGISTRATION_TOKEN: 'Aktywacja konta',
   ROLE: 'Rola',
