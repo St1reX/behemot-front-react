@@ -36,12 +36,13 @@ export function ProductDetailsPage() {
   const image = selectedImage && product.imagesUrls.includes(selectedImage) ? selectedImage : product.imagesUrls[0]
   const listingDocument = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><style>body{font:14px/1.7 system-ui;color:#1e293b;background:white;padding:20px;margin:0;overflow-wrap:anywhere}h1{font-size:23px;line-height:1.3}section{margin-top:24px;border-top:1px solid #e2e8f0;padding-top:16px}</style></head><body><h1>${escapeHtml(product.title ?? '')}</h1>${product.summary ?? ''}<section>${product.description ?? ''}</section></body></html>`
   return <div className="space-y-6">
-    <PageHeader title={product.customName ?? product.title ?? product.sku} description={`SKU: ${product.sku} · ${product.department.name} · ${product.producer.name}`} actions={<div className="flex gap-2">
+    <PageHeader title={product.customName ?? product.title ?? product.sku} description={`SKU: ${product.sku} · ${product.department?.name ?? 'Nie podano'} · ${product.producer?.name ?? 'Nie podano'}`} actions={<div className="flex gap-2">
       <Button nativeButton={false} variant="outline" render={<Link to="/products" />}>
         <ArrowLeft aria-hidden="true" />Produkty</Button>
       {requirePrivilege(`${ENTITIES.PRODUCT}:${ACTIONS.UPDATE}`) && <Button nativeButton={false} render={<Link to={`/products/${product.id}/edit`} />}>
         <Pencil aria-hidden="true" />Edytuj produkt</Button>}
     </div>} />
+    {product.isLegacy && <p role="status" className="rounded-xl border p-4 text-sm">Produkt z importu. Zarządzanie ofertami nie zostało jeszcze przejęte.</p>}
     <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-6">
         <Card>
@@ -79,10 +80,10 @@ export function ProductDetailsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Integracje i oferty</CardTitle>
-            <p className="text-sm text-muted-foreground">Powiązania produktu z kanałami sprzedaży. Każda oferta zewnętrzna jest osobnym wystawieniem.</p>
+            <p className="text-sm text-muted-foreground">Powiązania produktu z kanałami sprzedaży. Produkt może mieć jedną ofertę na każdym kanale.</p>
           </CardHeader>
           <CardContent>
-            <ProductIntegrations listings={product.externalListings} />
+            <ProductIntegrations listings={product.externalListings} contentVersion={product.contentVersion} isLegacy={product.isLegacy} />
           </CardContent>
         </Card>
         <Card>
@@ -90,7 +91,7 @@ export function ProductDetailsPage() {
             <CardTitle>Treść ogłoszenia</CardTitle>
           </CardHeader>
           <CardContent>
-            {product.listingContentError ? <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm">Szablon „{product.listingTemplate.name}” nie może wygenerować pełnej treści dla tych danych. {product.listingContentError}
+            {product.listingContentError ? <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm">Szablon „{product.listingTemplate?.name ?? 'Nie podano'}” nie może wygenerować pełnej treści dla tych danych. {product.listingContentError}
             </p> : <iframe title="Podgląd treści ogłoszenia produktu" sandbox="" referrerPolicy="no-referrer" srcDoc={listingDocument} className="h-[32rem] w-full rounded-lg border bg-white" />}
           </CardContent>
         </Card>
@@ -112,8 +113,8 @@ export function ProductDetailsPage() {
             </p>
             <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
               <span>Stan magazynowy</span>
-              <span className={product.quantity > 0 ? 'font-semibold' : 'font-semibold text-destructive'}>
-                {product.quantity} szt.</span>
+              <span className={product.quantity !== null && product.quantity > 0 ? 'font-semibold' : 'font-semibold text-destructive'}>
+                {product.quantity === null ? 'Nie podano' : `${product.quantity} szt.`}</span>
             </div>
           </CardContent>
         </Card>
@@ -124,7 +125,7 @@ export function ProductDetailsPage() {
           <CardContent>
             <dl className="space-y-4 text-sm">
               {[
-                ['SKU', product.sku], ['EAN', product.ean], ['OEM', product.oem.join(', ') || null], ['Strona', SIDE_LABELS[product.side]], ['Producent', product.producer.name], ['Dział', product.department.name], ['Magazyn', product.warehouse.name], ['Lokalizacja', product.warehouseLocation], ['Waga', `${product.weight} kg`], ['Długość × szerokość × wysokość', `${product.length} × ${product.width} × ${product.height ?? '—'} cm`], ['Szablon', product.listingTemplate.name], ['Dodano', new Date(product.createdAt).toLocaleString('pl-PL')], ['Zaktualizowano', new Date(product.updatedAt).toLocaleString('pl-PL')],
+                ['SKU', product.sku], ['EAN', product.ean], ['OEM', product.oem.join(', ') || null], ['Strona', product.side === null ? null : SIDE_LABELS[product.side]], ['Producent', product.producer?.name ?? 'Nie podano'], ['Dział', product.department?.name ?? 'Nie podano'], ['Magazyn', product.warehouse?.name], ['Lokalizacja', product.warehouseLocation], ['Waga', product.weight === null ? null : `${product.weight} kg`], ['Długość × szerokość × wysokość', [product.length, product.width, product.height].map((value) => value === null ? 'Nie podano' : `${value} cm`).join(' × ')], ['Szablon', product.listingTemplate?.name ?? 'Nie podano'], ['Dodano', new Date(product.createdAt).toLocaleString('pl-PL')], ['Zaktualizowano', new Date(product.updatedAt).toLocaleString('pl-PL')],
               ].map(([label, value]) => <div key={label}>
                 <dt className="text-xs text-muted-foreground">
                   {label}

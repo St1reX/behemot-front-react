@@ -4,7 +4,7 @@ import { ArrowLeft, Boxes, ImageIcon, Package, Save, Scale } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { FormProvider, useController, useForm, useFormContext, useWatch } from 'react-hook-form'
-import type { FieldPath } from 'react-hook-form'
+import type { DefaultValues, FieldPath } from 'react-hook-form'
 import { Link, useBlocker, useNavigate, useParams } from 'react-router'
 import { z } from 'zod'
 import { departmentApiClient } from '@/api/departments/DepartmentApiClient'
@@ -27,11 +27,11 @@ import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
 import { productSchema } from '@/types/products/product.schema'
 import type { ProductInput } from '@/types/products/product.schema'
-import type { Product } from '@/types/products/product.types'
+import type { Product, ProductImageFiles } from '@/types/products/product.types'
 import { ProductFitmentsEditor } from './components/ProductFitmentsEditor'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
-import { SIDE_LABELS } from './product.constants'
+import { EMPTY_PRODUCT_IMAGE_FILES, PRODUCT_IMAGE_ACCEPT, PRODUCT_IMAGE_FIELDS, PRODUCT_IMAGE_MAX_SIZE, PRODUCT_MAX_IMAGES_PER_UPLOAD_FIELD, SIDE_LABELS } from './product.constants'
 import { formatPrice } from './product.utils'
 
 const textareaClass = 'min-h-24 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive disabled:opacity-50'
@@ -58,14 +58,14 @@ function LinesInput({ name }: { name: 'imagesUrls' | 'descriptionImagesUrls' | '
     aria-describedby={fieldState.error ? `product-${name}-error` : undefined} />
 }
 
-function initialValues(product?: Product): ProductInput {
+function initialValues(product?: Product): DefaultValues<ProductInput> {
   return product ? {
     sku: product.sku, ean: product.ean, oem: product.oem, customName: product.customName,
     customSummary: product.customSummary, customDescription: product.customDescription, internalNote: product.internalNote,
-    price: Number(product.price), quantity: product.quantity, side: product.side,
-    weight: Number(product.weight), length: Number(product.length), width: Number(product.width), height: product.height === null ? null : Number(product.height),
-    warehouseLocation: product.warehouseLocation, warehouseId: product.warehouse.id,
-    producerId: product.producer.id, departmentId: product.department.id, listingTemplateId: product.listingTemplate.id,
+    price: product.price === null ? undefined : Number(product.price), side: product.side ?? undefined,
+    weight: product.weight === null ? undefined : Number(product.weight), length: product.length === null ? undefined : Number(product.length), width: product.width === null ? undefined : Number(product.width), height: product.height === null ? null : Number(product.height),
+    warehouseLocation: product.warehouseLocation ?? '', warehouseId: product.warehouse?.id ?? '',
+    producerId: product.producer?.id ?? '', departmentId: product.department?.id ?? '', listingTemplateId: product.listingTemplate?.id ?? '',
     imagesUrls: product.imagesUrls, descriptionImagesUrls: product.descriptionImagesUrls,
     productFitments: product.productFitments.map((fitment) => ({
       id: fitment.id, isPrimary: fitment.isPrimary,
@@ -75,7 +75,7 @@ function initialValues(product?: Product): ProductInput {
     })),
   } : {
     sku: '', ean: null, oem: [], customName: null, customSummary: null, customDescription: null, internalNote: null,
-    price: 0, quantity: 0, side: 'NONE', weight: 0, length: 0, width: 0, height: null,
+    price: undefined, side: 'NONE', weight: undefined, length: undefined, width: undefined, height: null,
     warehouseLocation: '', warehouseId: '', producerId: '', departmentId: '', listingTemplateId: '',
     imagesUrls: [], descriptionImagesUrls: [], productFitments: [],
   }
@@ -109,7 +109,8 @@ function ProductForm({ product }: { product?: Product }) {
   const canEdit = requirePrivilege(`${ENTITIES.PRODUCT}:${product ? ACTIONS.UPDATE : ACTIONS.CREATE}`)
   const form = useForm<ProductInput>({ resolver: zodResolver(productSchema), defaultValues: initialValues(product) })
   const { register, control, handleSubmit, setValue, setError, getFieldState, formState, reset } = form
-  const { isDirty } = formState
+  const [imageFiles, setImageFiles] = useState<ProductImageFiles>(EMPTY_PRODUCT_IMAGE_FILES)
+  const isDirty = formState.isDirty || imageFiles.productPhotoes.length > 0 || imageFiles.descProductPhotoes.length > 0
   const [departmentId, price, customName, images] = useWatch({ control, name: ['departmentId', 'price', 'customName', 'imagesUrls'] })
   const departments = useQuery({ queryKey: ['departments'], queryFn: ({ signal }) => departmentApiClient.list(signal), enabled: canRead(ENTITIES.DEPARTMENT), retry: false })
   const producers = useQuery({ queryKey: ['producers'], queryFn: ({ signal }) => producerApiClient.list(signal), enabled: canRead(ENTITIES.PRODUCER), retry: false })
@@ -119,10 +120,11 @@ function ProductForm({ product }: { product?: Product }) {
   const lookupError = lookups.find((query) => query.error)?.error
   const lookupLoading = lookups.some((query) => query.isFetching && !query.data)
   const mutation = useMutation({
-    mutationFn: (values: ProductInput) => product ? productApiClient.update(product.id, values) : productApiClient.create(values),
+    mutationFn: (values: ProductInput) => product ? productApiClient.update(product.id, values, imageFiles) : productApiClient.create(values, imageFiles),
     retry: false,
     onSuccess: async (result) => {
       saved.current = true
+      setImageFiles(EMPTY_PRODUCT_IMAGE_FILES)
       reset(initialValues(result))
       queryClient.setQueryData(['products', result.id], result)
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: true })
@@ -165,7 +167,7 @@ function ProductForm({ product }: { product?: Product }) {
       {...register(name, numeric ? optional ? { setValueAs: (value) => value === '' ? null : Number(value) } : { valueAsNumber: true } : optional ? { setValueAs: nullable } : {})}
       aria-invalid={Boolean(error)} aria-describedby={error ? `product-${name}-error` : undefined} />)
   }
-  function select(name: 'departmentId' | 'warehouseId' | 'producerId' | 'listingTemplateId', label: string, items: { id: string; name: string }[], existing: { id: string; name: string } | undefined, readable: boolean) {
+  function select(name: 'departmentId' | 'warehouseId' | 'producerId' | 'listingTemplateId', label: string, items: { id: string; name: string }[], existing: { id: string; name: string } | null | undefined, readable: boolean) {
     const options = existing && !items.some((item) => item.id === existing.id) ? [existing, ...items] : items
     const error = getFieldState(name, formState).error
     return field(name, label, <NativeSelect className="w-full" id={`product-${name}`} disabled={!readable || lookupLoading} {...register(name, { onChange: () => { if (name === 'departmentId') setValue('listingTemplateId', '', { shouldDirty: true, shouldValidate: true }) } })} aria-invalid={Boolean(error)} aria-describedby={error ? `product-${name}-error` : undefined}>
@@ -180,6 +182,24 @@ function ProductForm({ product }: { product?: Product }) {
   function textArea(name: 'internalNote' | 'customSummary' | 'customDescription', label: string, hint?: string) {
     return field(name, label, <textarea id={`product-${name}`} className={textareaClass} {...register(name, { setValueAs: nullable })} aria-invalid={Boolean(getFieldState(name, formState).error)} />, hint)
   }
+  function photoUpload(field: keyof ProductImageFiles, label: string) {
+    const files = imageFiles[field]
+    return <div className="space-y-2">
+      <label htmlFor={`upload-${field}`} className="text-sm font-medium">{label}</label>
+      <Input id={`upload-${field}`} type="file" accept={PRODUCT_IMAGE_ACCEPT} multiple onChange={(event) => {
+        const selected = Array.from(event.target.files ?? [])
+        if (selected.length > PRODUCT_MAX_IMAGES_PER_UPLOAD_FIELD || selected.some((file) => file.size > PRODUCT_IMAGE_MAX_SIZE)) {
+          toast.add({ type: 'error', title: 'Wybierz do 20 zdjęć, każde do 10 MB.' })
+          event.target.value = ''
+          setImageFiles((previous) => ({ ...previous, [field]: [] }))
+          return
+        }
+        setImageFiles((previous) => ({ ...previous, [field]: selected }))
+      }} />
+      <p className="text-xs text-muted-foreground">JPEG, PNG lub WebP. Zdjęcia zostaną dodane po zapisaniu produktu.</p>
+      {files.length > 0 && <p className="text-xs break-words">Wybrano: {files.map((file) => file.name).join(', ')}</p>}
+    </div>
+  }
   function lines(name: 'imagesUrls' | 'descriptionImagesUrls' | 'oem', label: string) {
     return field(name, label, <LinesInput name={name} />, name === 'oem' ? 'Jeden numer OEM w każdym wierszu.' : 'Jeden adres HTTP/HTTPS w każdym wierszu. Pierwsze zdjęcie produktu jest zdjęciem głównym.')
   }
@@ -190,6 +210,7 @@ function ProductForm({ product }: { product?: Product }) {
           <Save aria-hidden="true" />
           {product ? 'Zapisz zmiany' : 'Dodaj produkt'}
         </>} submitDisabled={!canEdit || lookupLoading || Boolean(lookupError)} submitProps={{ form: 'product-form' }} />} />
+      {product?.isLegacy && <p role="status" className="rounded-xl border p-4 text-sm">Produkt z importu. Uzupełnij wymagane dane. Zapis przejmie zarządzanie istniejącymi ofertami; aktualizacje kanałów są obecnie wyłączone.</p>}
       {formState.isSubmitted && Object.keys(formState.errors).length > 0 && <p role="alert" className="rounded-xl border border-destructive/30 p-4 text-sm text-destructive">Sprawdź wyróżnione pola. Produkt nie został zapisany.</p>}
       {mutation.error && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm whitespace-pre-wrap text-destructive">
         {mutation.error.message}
@@ -216,7 +237,8 @@ function ProductForm({ product }: { product?: Product }) {
                 {select('departmentId', 'Dział *', departments.data ?? [], product?.department, canRead(ENTITIES.DEPARTMENT))}
                 {select('producerId', 'Producent *', producers.data ?? [], product?.producer, canRead(ENTITIES.PRODUCER))}
                 {input('ean', 'EAN', false, true)}
-                {field('side', 'Strona', <NativeSelect id="product-side" className="w-full" {...register('side')}>
+                {field('side', 'Strona', <NativeSelect id="product-side" defaultValue={product ? product.side ?? '' : 'NONE'} className="w-full" {...register('side')}>
+                  <NativeSelectOption value="" disabled>Nie podano</NativeSelectOption>
                   {Object.entries(SIDE_LABELS).map(([key, label]) => <NativeSelectOption key={key} value={key}>
                     {label}
                   </NativeSelectOption>)}
@@ -260,8 +282,10 @@ function ProductForm({ product }: { product?: Product }) {
                   <ImageIcon aria-hidden="true" className="size-4 text-primary" />Zdjęcia</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
-                {lines('imagesUrls', 'Zdjęcia produktu')}
-                {lines('descriptionImagesUrls', 'Zdjęcia do opisu')}
+                {lines('imagesUrls', 'Adresy zdjęć produktu')}
+                {photoUpload(PRODUCT_IMAGE_FIELDS.PRODUCT, 'Dodaj zdjęcia produktu')}
+                {lines('descriptionImagesUrls', 'Adresy zdjęć do opisu')}
+                {photoUpload(PRODUCT_IMAGE_FIELDS.DESCRIPTION, 'Dodaj zdjęcia do opisu')}
               </CardContent>
             </Card>
             <Card>
@@ -270,7 +294,7 @@ function ProductForm({ product }: { product?: Product }) {
                 <p className="text-xs text-muted-foreground">Wybierz szablon przypisany do działu. Puste pola własnego skrótu i opisu korzystają z treści szablonu.</p>
               </CardHeader>
               <CardContent className="space-y-4">
-                {select('listingTemplateId', 'Szablon ogłoszenia *', (templates.data ?? []).filter((template) => template.department.id === departmentId), product?.department.id === departmentId ? product.listingTemplate : undefined, canRead(ENTITIES.PRODUCT_LISTING_TEMPLATE))}
+                {select('listingTemplateId', 'Szablon ogłoszenia *', (templates.data ?? []).filter((template) => template.department.id === departmentId), product?.department?.id === departmentId ? product.listingTemplate : undefined, canRead(ENTITIES.PRODUCT_LISTING_TEMPLATE))}
                 {textArea('customSummary', 'Własny skrót', 'Opcjonalnie: tekst lub podstawowy HTML.')}
                 {textArea('customDescription', 'Własny opis', 'Opcjonalnie: tekst lub podstawowy HTML.')}
               </CardContent>
@@ -316,7 +340,7 @@ function ProductForm({ product }: { product?: Product }) {
               <p className="text-xs text-muted-foreground">Aktualne powiązania z ofertami zewnętrznymi.</p>
             </CardHeader>
             <CardContent>
-              <ProductIntegrations listings={product?.externalListings ?? []} compact />
+              <ProductIntegrations listings={product?.externalListings ?? []} contentVersion={product?.contentVersion ?? 0} isLegacy={product?.isLegacy ?? false} compact />
               <p className="mt-3 text-xs text-muted-foreground">Przypisanie pojazdów do poszczególnych ofert jest niezależne od listy dopasowań produktu.</p>
             </CardContent>
           </Card>

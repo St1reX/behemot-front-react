@@ -30,10 +30,10 @@ export function ProductsPage() {
   const products = query.data ?? []
   const phrase = search.trim().toLocaleLowerCase('pl-PL')
   const filtered = products.filter((product) => {
-    const matchesSearch = [product.sku, product.ean, product.customName, product.title, product.producer.name, ...product.oem, ...product.productFitments.map(formatFitment)]
+    const matchesSearch = [product.sku, product.ean, product.customName, product.title, product.producer?.name, ...product.oem, ...product.productFitments.map(formatFitment)]
       .some((value) => value?.toLocaleLowerCase('pl-PL').includes(phrase))
     return matchesSearch && (!channel || product.externalListings.some((listing) => listing.channel === channel))
-      && (!stock || (stock === 'available' ? product.quantity > 0 : product.quantity === 0))
+      && (!stock || (stock === 'available' ? product.quantity !== null && product.quantity > 0 : stock === 'unknown' ? product.quantity === null : product.quantity === 0))
   })
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
@@ -45,7 +45,7 @@ export function ProductsPage() {
     <div className="grid gap-3 sm:grid-cols-3">
       {[
         ['Produkty w katalogu', products.length, 'Unikalne numery SKU'],
-        ['Dostępne na magazynie', products.filter((product) => product.quantity > 0).length, 'Produkty ze stanem większym od zera'],
+        ['Dostępne na magazynie', products.filter((product) => product.quantity !== null && product.quantity > 0).length, 'Produkty ze stanem większym od zera'],
         ['Z ofertami zewnętrznymi', products.filter((product) => product.externalListings.some((listing) => listing.externalId)).length, 'Przynajmniej jedna oferta z identyfikatorem'],
       ].map(([label, count, hint]) => <Card key={label} className="gap-0 py-0">
         <CardContent className="p-5">
@@ -74,6 +74,7 @@ export function ProductsPage() {
             <NativeSelectOption value="">Każdy stan</NativeSelectOption>
             <NativeSelectOption value="available">Dostępne</NativeSelectOption>
             <NativeSelectOption value="empty">Brak na stanie</NativeSelectOption>
+            <NativeSelectOption value="unknown">Nie podano</NativeSelectOption>
           </NativeSelect>
         </ListToolbar>
         {query.error ? <p role="alert" className="p-6 text-sm text-destructive">
@@ -109,7 +110,7 @@ export function ProductsPage() {
                           {product.sku}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {product.producer.name} · {product.department.name}
+                          {product.producer?.name ?? 'Nie podano'} · {product.department?.name ?? 'Nie podano'}
                         </p>
                       </div>
                     </div>
@@ -126,10 +127,10 @@ export function ProductsPage() {
                       {formatPrice(product.price)}
                     </p>
                     <p className={product.quantity ? 'mt-1 text-xs text-muted-foreground' : 'mt-1 text-xs text-destructive'}>
-                      {product.quantity} szt.</p>
+                      {product.quantity === null ? 'Nie podano' : `${product.quantity} szt.`}</p>
                   </TableCell>
                   <TableCell className="min-w-52">
-                    <ProductIntegrations listings={product.externalListings} compact />
+                    <ProductIntegrations listings={product.externalListings} contentVersion={product.contentVersion} isLegacy={product.isLegacy} compact />
                   </TableCell>
                   <TableCell className="pr-5">
                     <div className="flex justify-end gap-1">

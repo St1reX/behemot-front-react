@@ -11,6 +11,9 @@ export interface ProductFitment {
 }
 export interface ProductExternalListing {
   id: string
+  integrationId: string
+  integration: { id: string; name: string }
+  lastSyncedContentVersion: number | null
   channel: IntegrationChannel
   externalId: string | null
   syncStatus: 'PENDING' | 'SYNCED' | 'FAILED'
@@ -19,6 +22,8 @@ export interface ProductExternalListing {
 }
 export interface Product {
   id: string
+  isLegacy: boolean
+  contentVersion: number
   sku: string
   ean: string | null
   oem: string[]
@@ -32,21 +37,26 @@ export interface Product {
   listingContentError: string | null
   imagesUrls: string[]
   descriptionImagesUrls: string[]
-  price: string
-  quantity: number
-  side: ProductSide
-  weight: string
-  length: string
-  width: string
+  price: string | null
+  quantity: number | null
+  side: ProductSide | null
+  weight: string | null
+  length: string | null
+  width: string | null
   height: string | null
-  warehouseLocation: string
-  warehouse: { id: string; name: string }
-  listingTemplate: { id: string; name: string }
-  department: { id: string; name: string; shortcut: string }
-  producer: { id: string; name: string }
+  warehouseLocation: string | null
+  warehouse: { id: string; name: string } | null
+  listingTemplate: { id: string; name: string } | null
+  department: { id: string; name: string; shortcut: string } | null
+  producer: { id: string; name: string } | null
   primaryFitment: ProductFitment | null
   productFitments: ProductFitment[]
   externalListings: ProductExternalListing[]
   createdAt: string
   updatedAt: string
+}
+
+export interface ProductImageFiles {
+  productPhotoes: File[]
+  descProductPhotoes: File[]
 }

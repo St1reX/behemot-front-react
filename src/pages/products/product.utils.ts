@@ -1,6 +1,7 @@
 import type { ProductFitment } from '@/types/products/product.types'
 
-export function formatPrice(price: string | number) {
+export function formatPrice(price: string | number | null) {
+  if (price === null) return 'Nie podano'
   return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(Number(price))
 }
 

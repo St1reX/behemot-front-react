@@ -13,7 +13,6 @@ export const productSchema = z.object({
   customDescription: nullableText,
   internalNote: nullableText,
   price: decimal,
-  quantity: z.number({ error: 'Podaj liczbę sztuk.' }).int('Podaj pełną liczbę sztuk.').min(0),
   side: z.enum(['LEFT', 'RIGHT', 'BOTH', 'NONE']),
   weight: dimension, length: dimension, width: dimension, height: dimension.nullable(),
   warehouseLocation: z.string().trim().min(1, 'Podaj lokalizację w magazynie.'),
