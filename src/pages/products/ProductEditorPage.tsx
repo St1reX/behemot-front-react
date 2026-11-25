@@ -31,8 +31,10 @@ import type { Product, ProductImageFiles } from '@/types/products/product.types'
 import { ProductFitmentsEditor } from './components/ProductFitmentsEditor'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
-import { EMPTY_PRODUCT_IMAGE_FILES, PRODUCT_IMAGE_ACCEPT, PRODUCT_IMAGE_FIELDS, PRODUCT_IMAGE_MAX_SIZE, PRODUCT_MAX_IMAGES_PER_UPLOAD_FIELD, SIDE_LABELS } from './product.constants'
+import { SIDE_LABELS } from './product.constants'
 import { formatPrice } from './product.utils'
+
+const imageUploadLimits = { maxFiles: 20, maxFileSizeMb: 10 }
 
 const textareaClass = 'min-h-24 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive disabled:opacity-50'
 const nullable = (value: unknown) => typeof value === 'string' ? value.trim() || null : value
@@ -109,7 +111,7 @@ function ProductForm({ product }: { product?: Product }) {
   const canEdit = requirePrivilege(`${ENTITIES.PRODUCT}:${product ? ACTIONS.UPDATE : ACTIONS.CREATE}`)
   const form = useForm<ProductInput>({ resolver: zodResolver(productSchema), defaultValues: initialValues(product) })
   const { register, control, handleSubmit, setValue, setError, getFieldState, formState, reset } = form
-  const [imageFiles, setImageFiles] = useState<ProductImageFiles>(EMPTY_PRODUCT_IMAGE_FILES)
+  const [imageFiles, setImageFiles] = useState<ProductImageFiles>({ productPhotoes: [], descProductPhotoes: [] })
   const isDirty = formState.isDirty || imageFiles.productPhotoes.length > 0 || imageFiles.descProductPhotoes.length > 0
   const [departmentId, price, customName, images] = useWatch({ control, name: ['departmentId', 'price', 'customName', 'imagesUrls'] })
   const departments = useQuery({ queryKey: ['departments'], queryFn: ({ signal }) => departmentApiClient.list(signal), enabled: canRead(ENTITIES.DEPARTMENT), retry: false })
@@ -124,7 +126,7 @@ function ProductForm({ product }: { product?: Product }) {
     retry: false,
     onSuccess: async (result) => {
       saved.current = true
-      setImageFiles(EMPTY_PRODUCT_IMAGE_FILES)
+      setImageFiles({ productPhotoes: [], descProductPhotoes: [] })
       reset(initialValues(result))
       queryClient.setQueryData(['products', result.id], result)
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: true })
@@ -186,10 +188,10 @@ function ProductForm({ product }: { product?: Product }) {
     const files = imageFiles[field]
     return <div className="space-y-2">
       <label htmlFor={`upload-${field}`} className="text-sm font-medium">{label}</label>
-      <Input id={`upload-${field}`} type="file" accept={PRODUCT_IMAGE_ACCEPT} multiple onChange={(event) => {
+      <Input id={`upload-${field}`} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => {
         const selected = Array.from(event.target.files ?? [])
-        if (selected.length > PRODUCT_MAX_IMAGES_PER_UPLOAD_FIELD || selected.some((file) => file.size > PRODUCT_IMAGE_MAX_SIZE)) {
-          toast.add({ type: 'error', title: 'Wybierz do 20 zdjęć, każde do 10 MB.' })
+        if (selected.length > imageUploadLimits.maxFiles || selected.some((file) => file.size > imageUploadLimits.maxFileSizeMb * 1024 * 1024)) {
+          toast.add({ type: 'error', title: `Wybierz do ${imageUploadLimits.maxFiles} zdjęć, każde do ${imageUploadLimits.maxFileSizeMb} MB.` })
           event.target.value = ''
           setImageFiles((previous) => ({ ...previous, [field]: [] }))
           return
@@ -283,9 +285,9 @@ function ProductForm({ product }: { product?: Product }) {
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 {lines('imagesUrls', 'Adresy zdjęć produktu')}
-                {photoUpload(PRODUCT_IMAGE_FIELDS.PRODUCT, 'Dodaj zdjęcia produktu')}
+                {photoUpload('productPhotoes', 'Dodaj zdjęcia produktu')}
                 {lines('descriptionImagesUrls', 'Adresy zdjęć do opisu')}
-                {photoUpload(PRODUCT_IMAGE_FIELDS.DESCRIPTION, 'Dodaj zdjęcia do opisu')}
+                {photoUpload('descProductPhotoes', 'Dodaj zdjęcia do opisu')}
               </CardContent>
             </Card>
             <Card>
