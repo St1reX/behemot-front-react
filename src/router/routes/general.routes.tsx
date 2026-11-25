@@ -52,6 +52,10 @@ export const generalRoutes: RouteObject[] = [
             children: [{ path: '/producers', lazy: async () => ({ Component: (await import('@/pages/producers/ProducersPage')).ProducersPage }) }],
           },
           {
+            element: <RequirePrivilege requiredPrivileges={`${ENTITIES.DEPARTMENT}:${ACTIONS.READ}`} />,
+            children: [{ path: '/departments', lazy: async () => ({ Component: (await import('@/pages/departments/DepartmentsPage')).DepartmentsPage }) }],
+          },
+          {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.WAREHOUSE}:${ACTIONS.READ}`} />,
             children: [{ path: '/warehouses', lazy: async () => ({ Component: (await import('@/pages/warehouses/WarehousesPage')).WarehousesPage }) }],
           },
