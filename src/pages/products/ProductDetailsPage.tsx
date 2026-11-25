@@ -80,7 +80,7 @@ export function ProductDetailsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Integracje i oferty</CardTitle>
-            <p className="text-sm text-muted-foreground">Powiązania produktu z kanałami sprzedaży. Produkt może mieć jedną ofertę na każdym kanale.</p>
+            <p className="text-sm text-muted-foreground">Produkt i jego dopasowania mogą mieć wiele ofert na tym samym koncie integracji.</p>
           </CardHeader>
           <CardContent>
             <ProductIntegrations listings={product.externalListings} contentVersion={product.contentVersion} isLegacy={product.isLegacy} />
