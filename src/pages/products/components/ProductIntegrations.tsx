@@ -1,11 +1,12 @@
 import { CircleCheck, CircleDashed, Clock3, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { IntegrationChannel, ProductExternalListing } from '@/types/products/product.types'
-import { CHANNEL_LABELS } from '../product.constants'
+import type { ProductExternalListing } from '@/types/products/product.types'
+import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 
 export function ProductIntegrations({ listings, contentVersion, isLegacy, compact = false }: { listings: ProductExternalListing[]; contentVersion: number; isLegacy: boolean; compact?: boolean }) {
-  return <div className={cn('grid gap-3 sm:grid-cols-3', compact && 'flex flex-wrap gap-1.5')}>
-    {(Object.keys(CHANNEL_LABELS) as IntegrationChannel[]).map((channel) => {
+  return <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-4', compact && 'flex flex-wrap gap-1.5')}>
+    {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((channel) => {
       const offers = listings.filter((listing) => listing.channel === channel)
       const published = offers.filter((listing) => listing.externalId).length
       const failed = offers.some((listing) => listing.syncStatus === 'FAILED')

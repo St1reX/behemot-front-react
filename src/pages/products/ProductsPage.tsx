@@ -13,10 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import type { IntegrationChannel } from '@/types/products/product.types'
+import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
-import { CHANNEL_LABELS } from './product.constants'
+import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import { formatFitment, formatPrice } from './product.utils'
 
 const PAGE_SIZE = 25
@@ -66,7 +66,7 @@ export function ProductsPage() {
         <ListToolbar search={{ value: search, onChange: (value) => { setSearch(value); setPage(1) }, label: 'Szukaj produktów', placeholder: 'SKU, nazwa, EAN, OEM, pojazd…' }} isFetching={query.isFetching} onRefresh={() => { void query.refetch() }} summary={!query.isPending && !query.error && `${filtered.length} z ${products.length} produktów`}>
           <NativeSelect aria-label="Kanał sprzedaży" value={channel} onChange={(event) => { setChannel(event.target.value); setPage(1) }}>
             <NativeSelectOption value="">Wszystkie integracje</NativeSelectOption>
-            {(Object.keys(CHANNEL_LABELS) as IntegrationChannel[]).map((key) => <NativeSelectOption key={key} value={key}>
+            {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((key) => <NativeSelectOption key={key} value={key}>
               {CHANNEL_LABELS[key]}
             </NativeSelectOption>)}
           </NativeSelect>

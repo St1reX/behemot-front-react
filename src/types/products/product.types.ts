@@ -1,7 +1,7 @@
+import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
 import type { CarGeneration, CarModel } from '@/types/vehicles/vehicle.types'
 
 export type ProductSide = 'LEFT' | 'RIGHT' | 'BOTH' | 'NONE'
-export type IntegrationChannel = 'ALLEGRO' | 'BASELINKER' | 'PRESTASHOP'
 export interface ProductFitment {
   id: string
   isPrimary: boolean
@@ -14,7 +14,7 @@ export interface ProductExternalListing {
   integrationId: string
   integration: { id: string; name: string }
   lastSyncedContentVersion: number | null
-  channel: IntegrationChannel
+  channel: MarketplaceIntegrationChannel
   externalId: string | null
   syncStatus: 'PENDING' | 'SYNCED' | 'FAILED'
   lastSyncedAt: string | null

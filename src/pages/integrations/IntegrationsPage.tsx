@@ -1,0 +1,105 @@
+import { useQuery } from '@tanstack/react-query'
+import { ChevronRight, Database, FolderOpen, Store } from 'lucide-react'
+import { useState } from 'react'
+import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
+import { ListSkeleton } from '@/components/common/ListSkeleton'
+import { ListToolbar } from '@/components/common/ListToolbar'
+import { PageHeader } from '@/components/common/PageHeader'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { useAccess } from '@/hooks/useAccess'
+import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
+import { ACTIONS } from '@/shared/constants/actions'
+import { ENTITIES } from '@/shared/constants/entities'
+import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import { IntegrationDetailsDialog } from './components/IntegrationDetailsDialog'
+import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
+import { STATUS_CLASSES, STATUS_LABELS } from './integration.constants'
+
+export function IntegrationsPage() {
+  const { requirePrivilege } = useAccess()
+  const [selected, setSelected] = useState<SelectedIntegration | null>(null)
+  const query = useQuery({
+    queryKey: ['integrations'],
+    queryFn: ({ signal }) => integrationApiClient.list(signal),
+    enabled: requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.READ}`),
+    retry: false,
+  })
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Integracje" description="Źródła danych i konta marketplace połączone z systemem." />
+      <Card className="gap-0 py-0">
+        <CardContent className="p-0">
+          <ListToolbar
+            isFetching={query.isFetching}
+            onRefresh={() => { void query.refetch() }}
+            summary={query.data && <span>Konta marketplace: {query.data.marketplaces.length}</span>}
+          />
+          {query.error ? (
+            <p role="alert" className="p-6 text-sm text-destructive">{query.error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.</p>
+          ) : query.isPending ? (
+            <ListSkeleton message="Wczytywanie integracji…" />
+          ) : query.data && (
+            <div className="space-y-6 p-4 sm:p-6">
+              <section aria-label="Podstawowe źródło danych">
+                <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Podstawowe źródło danych</p>
+                <Button
+                  variant="ghost"
+                  className="h-auto w-full justify-start gap-4 rounded-xl border bg-muted/30 p-4 text-left whitespace-normal"
+                  onClick={() => { if (query.data) setSelected({ kind: 'bolma', integration: query.data.bolma }) }}
+                >
+                  <Database aria-hidden="true" className="size-5 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">{query.data.bolma.name}</span><span className="block text-xs font-normal text-muted-foreground">Katalog produktów · MySQL</span></span>
+                  <span className="text-xs text-muted-foreground">{query.data.bolma.isConfigured ? 'Skonfigurowana' : 'Brak konfiguracji'}</span>
+                  <ChevronRight aria-hidden="true" className="shrink-0" />
+                </Button>
+              </section>
+              <section aria-label="Integracje marketplace">
+                <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Marketplace</p>
+                {query.data.marketplaces.length === 0 ? (
+                  <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Nie dodano jeszcze żadnych integracji marketplace.</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((channel) => {
+                      const integrations = query.data.marketplaces.filter((integration) => integration.channel === channel)
+                      if (!integrations.length) return null
+                      return (
+                        <li key={channel}>
+                          <Collapsible defaultOpen className="group/channel">
+                            <CollapsibleTrigger render={<Button variant="ghost" className="w-full justify-start gap-3" />}>
+                              <ChevronRight aria-hidden="true" className="transition-transform group-data-open/channel:rotate-90" />
+                              <FolderOpen aria-hidden="true" className="text-muted-foreground" />
+                              <span>{CHANNEL_LABELS[channel]}</span>
+                              <span className="ml-auto text-xs text-muted-foreground">{integrations.length}</span>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <ul className="mt-1 ml-5 space-y-1 border-l pl-4">
+                                {integrations.map((integration) => (
+                                  <li key={integration.id}>
+                                    <Button variant="ghost" className="h-auto w-full justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
+                                      <Store aria-hidden="true" className="shrink-0 text-muted-foreground" />
+                                      <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === 'SANDBOX' && ' · Sandbox'}</span></span>
+                                      <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
+                                      <ChevronRight aria-hidden="true" className="shrink-0" />
+                                    </Button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </section>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} />}
+    </div>
+  )
+}

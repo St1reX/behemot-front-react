@@ -1,4 +1,5 @@
 export const ENTITIES = {
+  INTEGRATION: 'INTEGRATION',
   AUDIT_LOG: 'AUDIT_LOG',
   USER: 'USER',
   REGISTRATION_TOKEN: 'REGISTRATION_TOKEN',
@@ -19,6 +20,7 @@ export const ENTITIES = {
 export type Entity = (typeof ENTITIES)[keyof typeof ENTITIES]
 
 export const ENTITY_LABELS: Record<Entity, string> = {
+  INTEGRATION: 'Integracje',
   AUDIT_LOG: 'Logi audytowe',
   USER: 'Użytkownik',
   REGISTRATION_TOKEN: 'Aktywacja konta',

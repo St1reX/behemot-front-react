@@ -1,4 +1,4 @@
-import { CarFront, Factory, FileText, Handshake, History, LayoutDashboard, Network, Package, ShieldCheck, Users, Warehouse } from 'lucide-react'
+import { CarFront, Factory, FileText, Handshake, History, LayoutDashboard, Network, Package, Plug, ShieldCheck, Users, Warehouse } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation } from 'react-router'
 import behemotLogo from '@/assets/images/behemot-logo.jpeg'
@@ -34,6 +34,7 @@ const navigationGroups: { label: string; items: { title: string; to: string; ico
   {
     label: 'Administracja',
     items: [
+      { title: 'Integracje', to: '/integrations', icon: Plug, privilege: `${ENTITIES.INTEGRATION}:${ACTIONS.READ}` },
       { title: 'Szablony ogłoszeń', to: '/listing-templates', icon: FileText, privilege: `${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.READ}` },
       { title: 'Działy', to: '/departments', icon: Network, privilege: `${ENTITIES.DEPARTMENT}:${ACTIONS.READ}` },
       { title: 'Role i uprawnienia', to: '/roles', icon: ShieldCheck, privilege: `${ENTITIES.ROLE}:${ACTIONS.READ}` },
