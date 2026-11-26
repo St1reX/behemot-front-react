@@ -6,3 +6,11 @@ export const emagConfigurationSchema = z.object({
 }).strict()
 
 export type EmagConfigurationInput = z.infer<typeof emagConfigurationSchema>
+
+export interface EmagConnectionResponse {
+  results: {
+    market: 'RO' | 'BG' | 'HU'
+    status: 'CONNECTED' | 'EXISTING' | 'ERROR'
+    error: string | null
+  }[]
+}

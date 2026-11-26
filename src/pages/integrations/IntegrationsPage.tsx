@@ -74,7 +74,7 @@ export function IntegrationsPage() {
               <MarketplaceLogo channel="EMAG" className="h-16 w-32 shrink-0 object-contain" />
               <div><h2 className="text-base font-semibold">eMAG</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
             </div>
-            <p className="text-sm text-muted-foreground">Połącz konto eMAG, podając e-mail i hasło.</p>
+            <p className="text-sm text-muted-foreground">Podaj e-mail i hasło raz — dodamy dostępne rynki RO, BG i HU.</p>
             {canCreate ? (
               <Button type="button" variant="outline" className="w-full" onClick={() => setEmagConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto eMAG</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
