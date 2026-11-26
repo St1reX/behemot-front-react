@@ -22,12 +22,14 @@ import { ErliConfigurationDialog } from './components/erli/ErliConfigurationDial
 import { IntegrationDeleteDialog } from './components/IntegrationDeleteDialog'
 import { PrestashopConfigurationDialog } from './components/prestashop/PrestashopConfigurationDialog'
 import { MarketplaceLogo } from './components/MarketplaceLogo'
+import { EmagConfigurationDialog } from './components/emag/EmagConfigurationDialog'
 
 export function IntegrationsPage() {
   const { requirePrivilege } = useAccess()
   const [selected, setSelected] = useState<SelectedIntegration | null>(null)
   const [erliConfigurationOpen, setErliConfigurationOpen] = useState(false)
   const [prestashopConfigurationOpen, setPrestashopConfigurationOpen] = useState(false)
+  const [emagConfigurationOpen, setEmagConfigurationOpen] = useState(false)
   const [deleting, setDeleting] = useState<MarketplaceIntegration | null>(null)
   const canCreate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`)
   const canDelete = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.DELETE}`)
@@ -63,6 +65,18 @@ export function IntegrationsPage() {
             <p className="text-sm text-muted-foreground">Połącz własny sklep, podając jego adres i klucz API.</p>
             {canCreate ? (
               <Button type="button" variant="outline" className="w-full" onClick={() => setPrestashopConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj sklep PrestaShop</Button>
+            ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex h-16 items-center gap-4">
+              <MarketplaceLogo channel="EMAG" className="h-16 w-32 shrink-0 object-contain" />
+              <div><h2 className="text-base font-semibold">eMAG</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
+            </div>
+            <p className="text-sm text-muted-foreground">Połącz konto eMAG, podając e-mail i hasło.</p>
+            {canCreate ? (
+              <Button type="button" variant="outline" className="w-full" onClick={() => setEmagConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto eMAG</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
           </CardContent>
         </Card>
@@ -144,6 +158,7 @@ export function IntegrationsPage() {
       {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected({ kind: 'marketplace', integration })} />}
       {erliConfigurationOpen && canCreate && <ErliConfigurationDialog onClose={() => setErliConfigurationOpen(false)} />}
       {prestashopConfigurationOpen && canCreate && <PrestashopConfigurationDialog onClose={() => setPrestashopConfigurationOpen(false)} />}
+      {emagConfigurationOpen && canCreate && <EmagConfigurationDialog onClose={() => setEmagConfigurationOpen(false)} />}
       {deleting && canDelete && <IntegrationDeleteDialog integration={deleting} onClose={() => setDeleting(null)} />}
     </div>
   )

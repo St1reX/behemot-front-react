@@ -38,7 +38,7 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
   const marketplace = selected.kind === 'marketplace' ? selected.integration : null
   const queryClient = useQueryClient()
   const { requirePrivilege } = useAccess()
-  const canCheck = (marketplace?.channel === 'ERLI' || marketplace?.channel === 'PRESTASHOP') && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
+  const canCheck = (marketplace?.channel === 'ERLI' || marketplace?.channel === 'PRESTASHOP' || marketplace?.channel === 'EMAG') && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
   const mutation = useMutation({
     mutationFn: (id: string) => integrationApiClient.checkConnection(id),
     retry: false,
@@ -96,6 +96,7 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
               <Detail label="Ostatnia aktualizacja">{formatDate(marketplace.updatedAt)}</Detail>
             </dl>
             <p className="text-xs text-muted-foreground">Widok prezentuje ostatnio zapisane dane konta. Synchronizacja ofert nie jest jeszcze dostępna.</p>
+            {marketplace.channel === 'EMAG' && <p className="text-xs text-muted-foreground">eMAG potwierdza dostęp do API przez odczyt liczby ofert. Nazwa konfiguracji pochodzi z e-maila konta; publiczne API nie udostępnia profilu sprzedawcy.</p>}
           </>
         )}
         {checkError && <p role="alert" className="text-sm text-destructive">{checkError}</p>}
