@@ -31,15 +31,16 @@ function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString('pl-PL') : 'Brak danych'
 }
 
-export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
+export function IntegrationDetailsDialog({ selected, onClose, onUpdated, onReconnect }: {
   selected: SelectedIntegration
   onClose: () => void
   onUpdated: (integration: MarketplaceIntegration) => void
+  onReconnect: (integration: MarketplaceIntegration) => void
 }) {
   const marketplace = selected.kind === 'marketplace' ? selected.integration : null
   const queryClient = useQueryClient()
   const { requirePrivilege } = useAccess()
-  const canCheck = (marketplace?.channel === 'ERLI' || marketplace?.channel === 'PRESTASHOP' || marketplace?.channel === 'EMAG') && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
+  const canCheck = Boolean(marketplace) && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
   const mutation = useMutation({
     mutationFn: (id: string) => integrationApiClient.checkConnection(id),
     retry: false,
@@ -98,11 +99,13 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
             </dl>
             <p className="text-xs text-muted-foreground">Widok prezentuje ostatnio zapisane dane konta. Synchronizacja ofert nie jest jeszcze dostępna.</p>
             {marketplace.channel === 'EMAG' && <p className="text-xs text-muted-foreground">eMAG potwierdza dostęp do API przez odczyt liczby ofert. Nazwa konfiguracji pochodzi z e-maila konta; publiczne API nie udostępnia profilu sprzedawcy.</p>}
+            {marketplace.channel === 'ALLEGRO' && <p className="text-xs text-muted-foreground">Token nie jest odświeżany automatycznie. Po jego wygaśnięciu lub cofnięciu dostępu w Allegro połącz konto ponownie.</p>}
           </>
         )}
         {checkError && <p role="alert" className="text-sm text-destructive">{checkError}</p>}
         <DialogFooter>
           <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onClose}>Zamknij</Button>
+          {canCheck && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`) && marketplace?.channel === 'ALLEGRO' && <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => onReconnect(marketplace)}>Połącz ponownie</Button>}
           {canCheck && marketplace && (
             <Button type="button" className="h-auto min-h-9 whitespace-normal" disabled={mutation.isPending} onClick={() => mutation.mutate(marketplace.id)}>
               <RefreshCw aria-hidden="true" className={mutation.isPending ? 'shrink-0 animate-spin motion-reduce:animate-none' : 'shrink-0'} />

@@ -1,11 +1,14 @@
 import erliLogo from '@/assets/images/erli-logo.png'
 import emagLogo from '@/assets/images/emag-logo.png'
 import prestashopLogo from '@/assets/images/presta-logo.png'
+import allegroLogo from '@/assets/images/allegro-logo.png'
 import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
 import { Store } from 'lucide-react'
 
 export function MarketplaceLogo({ channel, className }: { channel: MarketplaceIntegrationChannel; className?: string }) {
   switch (channel) {
+    case 'ALLEGRO':
+      return <img src={allegroLogo} alt="Allegro" className={className} />
     case 'ERLI':
       return <img src={erliLogo} alt="ERLI" className={className} />
     case 'EMAG':

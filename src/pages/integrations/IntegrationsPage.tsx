@@ -23,6 +23,8 @@ import { IntegrationDeleteDialog } from './components/IntegrationDeleteDialog'
 import { PrestashopConfigurationDialog } from './components/prestashop/PrestashopConfigurationDialog'
 import { MarketplaceLogo } from './components/MarketplaceLogo'
 import { EmagConfigurationDialog } from './components/emag/EmagConfigurationDialog'
+import { AllegroConfigurationDialog } from './components/allegro/AllegroConfigurationDialog'
+import { AllegroAuthorizationResult } from './components/allegro/AllegroAuthorizationResult'
 
 export function IntegrationsPage() {
   const { requirePrivilege } = useAccess()
@@ -30,9 +32,12 @@ export function IntegrationsPage() {
   const [erliConfigurationOpen, setErliConfigurationOpen] = useState(false)
   const [prestashopConfigurationOpen, setPrestashopConfigurationOpen] = useState(false)
   const [emagConfigurationOpen, setEmagConfigurationOpen] = useState(false)
+  const [allegroConfiguration, setAllegroConfiguration] = useState<{ integration?: MarketplaceIntegration } | null>(null)
   const [deleting, setDeleting] = useState<MarketplaceIntegration | null>(null)
   const canCreate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`)
   const canDelete = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.DELETE}`)
+  const canUpdate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
+  const canAuthorizeAllegro = canCreate && canUpdate
   const query = useQuery({
     queryKey: ['integrations'],
     queryFn: ({ signal }) => integrationApiClient.list(signal),
@@ -43,7 +48,20 @@ export function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Integracje" description="Źródła danych i konta marketplace połączone z systemem." />
+      <AllegroAuthorizationResult />
       <section aria-label="Dostępne integracje" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex h-16 items-center gap-4">
+              <MarketplaceLogo channel="ALLEGRO" className="h-16 w-32 shrink-0 object-contain" />
+              <div><h2 className="text-base font-semibold">Allegro</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
+            </div>
+            <p className="text-sm text-muted-foreground">Połącz konto przez autoryzację na stronie Allegro.</p>
+            {canAuthorizeAllegro ? (
+              <Button type="button" variant="outline" className="w-full" onClick={() => setAllegroConfiguration({})}><Plus aria-hidden="true" />Dodaj konto Allegro</Button>
+            ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
@@ -74,7 +92,7 @@ export function IntegrationsPage() {
               <MarketplaceLogo channel="EMAG" className="h-16 w-32 shrink-0 object-contain" />
               <div><h2 className="text-base font-semibold">eMAG</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
             </div>
-            <p className="text-sm text-muted-foreground">Podaj e-mail i hasło raz — dodamy dostępne rynki RO, BG i HU.</p>
+            <p className="text-sm text-muted-foreground">Wybierz rynek i podaj adres API, e-mail oraz hasło konta.</p>
             {canCreate ? (
               <Button type="button" variant="outline" className="w-full" onClick={() => setEmagConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto eMAG</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
@@ -155,7 +173,9 @@ export function IntegrationsPage() {
           )}
         </CardContent>
       </Card>
-      {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected({ kind: 'marketplace', integration })} />}
+      {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected({ kind: 'marketplace', integration })}
+        onReconnect={(integration) => { setSelected(null); setAllegroConfiguration({ integration }) }} />}
+      {allegroConfiguration && canAuthorizeAllegro && <AllegroConfigurationDialog integration={allegroConfiguration.integration} onClose={() => setAllegroConfiguration(null)} />}
       {erliConfigurationOpen && canCreate && <ErliConfigurationDialog onClose={() => setErliConfigurationOpen(false)} />}
       {prestashopConfigurationOpen && canCreate && <PrestashopConfigurationDialog onClose={() => setPrestashopConfigurationOpen(false)} />}
       {emagConfigurationOpen && canCreate && <EmagConfigurationDialog onClose={() => setEmagConfigurationOpen(false)} />}
