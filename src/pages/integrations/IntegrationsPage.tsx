@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Database, FolderOpen, Store } from 'lucide-react'
+import { ChevronRight, Database, FolderOpen, Plus, Store } from 'lucide-react'
 import { useState } from 'react'
 import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
+import erliLogo from '@/assets/images/erli-logo.png'
 import { ListSkeleton } from '@/components/common/ListSkeleton'
 import { ListToolbar } from '@/components/common/ListToolbar'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -16,10 +17,13 @@ import type { MarketplaceIntegrationChannel } from '@/types/integrations/integra
 import { IntegrationDetailsDialog } from './components/IntegrationDetailsDialog'
 import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
 import { STATUS_CLASSES, STATUS_LABELS } from './integration.constants'
+import { ErliConfigurationDialog } from './components/erli/ErliConfigurationDialog'
 
 export function IntegrationsPage() {
   const { requirePrivilege } = useAccess()
   const [selected, setSelected] = useState<SelectedIntegration | null>(null)
+  const [erliConfigurationOpen, setErliConfigurationOpen] = useState(false)
+  const canCreate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`)
   const query = useQuery({
     queryKey: ['integrations'],
     queryFn: ({ signal }) => integrationApiClient.list(signal),
@@ -30,6 +34,20 @@ export function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Integracje" description="Źródła danych i konta marketplace połączone z systemem." />
+      <section aria-label="Dostępne integracje" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <img src={erliLogo} alt="ERLI" className="h-16 w-32 shrink-0 object-contain" />
+              <div><h2 className="text-base font-semibold">ERLI</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
+            </div>
+            <p className="text-sm text-muted-foreground">Dodaj konto sprzedawcy za pomocą tokenu API.</p>
+            {canCreate ? (
+              <Button type="button" variant="outline" className="w-full" onClick={() => setErliConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto ERLI</Button>
+            ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
+          </CardContent>
+        </Card>
+      </section>
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
           <ListToolbar
@@ -79,7 +97,7 @@ export function IntegrationsPage() {
                                 {integrations.map((integration) => (
                                   <li key={integration.id}>
                                     <Button variant="ghost" className="h-auto w-full justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
-                                      <Store aria-hidden="true" className="shrink-0 text-muted-foreground" />
+                                      {integration.channel === 'ERLI' ? <img src={erliLogo} alt="ERLI" className="h-8 w-16 shrink-0 object-contain" /> : <Store aria-hidden="true" className="shrink-0 text-muted-foreground" />}
                                       <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === 'SANDBOX' && ' · Sandbox'}</span></span>
                                       <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
                                       <ChevronRight aria-hidden="true" className="shrink-0" />
@@ -100,6 +118,7 @@ export function IntegrationsPage() {
         </CardContent>
       </Card>
       {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} />}
+      {erliConfigurationOpen && canCreate && <ErliConfigurationDialog onClose={() => setErliConfigurationOpen(false)} />}
     </div>
   )
 }

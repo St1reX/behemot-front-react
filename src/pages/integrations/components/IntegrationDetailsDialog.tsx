@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Database, Store } from 'lucide-react'
+import erliLogo from '@/assets/images/erli-logo.png'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import type { BolmaIntegration, MarketplaceIntegration } from '@/types/integrations/integration.types'
@@ -30,9 +31,9 @@ export function IntegrationDetailsDialog({ selected, onClose }: { selected: Sele
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto font-sans sm:max-w-2xl">
         <DialogHeader className="pr-8">
-          <div className="mb-2 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          {marketplace?.channel === 'ERLI' ? <img src={erliLogo} alt="ERLI" className="mb-2 h-16 w-32 object-contain" /> : <div className="mb-2 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Icon aria-hidden="true" className="size-5" />
-          </div>
+          </div>}
           <DialogTitle>{selected.integration.name}</DialogTitle>
           <DialogDescription>
             {marketplace ? 'Szczegóły konta marketplace i ostatniej aktywności.' : 'Podstawowe źródło katalogu produktów — bezpośrednie połączenie z bazą Bolmy.'}
