@@ -1,16 +1,16 @@
-import { z } from 'zod'
+import { z } from 'zod';
+import { apiBaseUrlSchema } from '../schemas/apiBaseUrl.schema';
 
-export const emagConfigurationSchema = z.object({
-  username: z.string().trim().email('Podaj prawidłowy adres e-mail konta eMAG.').max(255),
-  password: z.string().min(1, 'Podaj hasło konta eMAG.').max(4096),
-}).strict()
+export const emagMarketSchema = z.enum(['RO', 'BG', 'HU']);
+export type EmagMarket = z.infer<typeof emagMarketSchema>;
 
-export type EmagConfigurationInput = z.infer<typeof emagConfigurationSchema>
+export const emagConfigurationSchema = z
+   .object({
+      baseUrl: apiBaseUrlSchema,
+      market: emagMarketSchema,
+      username: z.string().trim().email('Podaj prawidłowy adres e-mail konta eMAG.').max(255),
+      password: z.string().min(1, 'Podaj hasło konta eMAG.').max(4096),
+   })
+   .strict();
 
-export interface EmagConnectionResponse {
-  results: {
-    market: 'RO' | 'BG' | 'HU'
-    status: 'CONNECTED' | 'EXISTING' | 'ERROR'
-    error: string | null
-  }[]
-}
+export type EmagConfigurationInput = z.infer<typeof emagConfigurationSchema>;

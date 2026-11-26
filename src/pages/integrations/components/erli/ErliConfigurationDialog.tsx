@@ -14,7 +14,7 @@ export function ErliConfigurationDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ErliConfigurationInput>({
     resolver: zodResolver(erliConfigurationSchema),
-    defaultValues: { token: '' },
+    defaultValues: { baseUrl: '', token: '' },
   })
   const mutation = useMutation({
     mutationFn: (input: ErliConfigurationInput) => erliApiClient.createConfiguration(input),
@@ -37,6 +37,12 @@ export function ErliConfigurationDialog({ onClose }: { onClose: () => void }) {
           <DialogDescription>Wklej klucz API z panelu sprzedawcy ERLI: Metoda integracji → Własna integracja po API.</DialogDescription>
         </DialogHeader>
         <form className="space-y-4" noValidate onSubmit={handleSubmit((values) => { if (!mutation.isPending) mutation.mutate(values) })}>
+          <div className="grid gap-2">
+            <label htmlFor="erli-url" className="text-sm font-medium">Adres API</label>
+            <Input id="erli-url" type="url" autoComplete="url" maxLength={2048} disabled={mutation.isPending}
+              aria-invalid={Boolean(errors.baseUrl)} aria-describedby={errors.baseUrl ? 'erli-url-error' : undefined} {...register('baseUrl')} />
+            {errors.baseUrl && <p id="erli-url-error" className="text-xs text-destructive">{errors.baseUrl.message}</p>}
+          </div>
           <div className="grid gap-2">
             <label htmlFor="erli-token" className="text-sm font-medium">Token API</label>
             <Input id="erli-token" type="password" autoComplete="new-password" autoCapitalize="none" autoCorrect="off" spellCheck={false}

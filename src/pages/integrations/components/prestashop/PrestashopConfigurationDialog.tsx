@@ -38,7 +38,7 @@ export function PrestashopConfigurationDialog({ onClose }: { onClose: () => void
         </DialogHeader>
         <form className="space-y-4" noValidate onSubmit={handleSubmit((values) => { if (!mutation.isPending) mutation.mutate(values) })}>
           <div className="grid gap-2">
-            <label htmlFor="prestashop-url" className="text-sm font-medium">Adres sklepu</label>
+            <label htmlFor="prestashop-url" className="text-sm font-medium">Adres API</label>
             <Input id="prestashop-url" type="url" placeholder="https://moj-sklep.pl" autoComplete="url" maxLength={2048}
               disabled={mutation.isPending} aria-invalid={Boolean(errors.baseUrl)}
               aria-describedby={errors.baseUrl ? 'prestashop-url-help prestashop-url-error' : 'prestashop-url-help'} {...register('baseUrl')} />

@@ -1,9 +1,10 @@
 import { apiHttp } from '@/api/http'
-import type { EmagConfigurationInput, EmagConnectionResponse } from '@/types/integrations/emag/emag.schema'
+import type { EmagConfigurationInput } from '@/types/integrations/emag/emag.schema'
+import type { MarketplaceIntegration } from '@/types/integrations/integration.types'
 
 export const emagApiClient = {
-  async createConfiguration(input: EmagConfigurationInput): Promise<EmagConnectionResponse> {
-    const { data } = await apiHttp.post<EmagConnectionResponse>('/integrations/marketplace/EMAG', input, { showErrorToast: false, timeout: 60_000 })
+  async createConfiguration(input: EmagConfigurationInput): Promise<MarketplaceIntegration> {
+    const { data } = await apiHttp.post<MarketplaceIntegration>('/integrations/marketplace/EMAG', input, { showErrorToast: false })
     return data
   },
 }

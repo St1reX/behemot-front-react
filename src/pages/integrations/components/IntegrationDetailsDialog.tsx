@@ -12,6 +12,7 @@ import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import type { BolmaIntegration, IntegrationsResponse, MarketplaceIntegration } from '@/types/integrations/integration.types'
 import { STATUS_LABELS } from '../integration.constants'
 import { MarketplaceLogo } from './MarketplaceLogo'
+import { EmagMarketLabel } from './emag/EmagMarketLabel'
 
 export type SelectedIntegration =
   | { kind: 'bolma'; integration: BolmaIntegration }
@@ -85,7 +86,7 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
               <Detail label="Środowisko">{marketplace.environment === 'SANDBOX' ? 'Testowe (Sandbox)' : 'Produkcyjne'}</Detail>
               <Detail label="Identyfikator konta">{marketplace.externalAccountId}</Detail>
               <Detail label="Nazwa użytkownika">{marketplace.externalUsername}</Detail>
-              <Detail label="Rynek">{marketplace.market}</Detail>
+              <Detail label="Rynek">{marketplace.channel === 'EMAG' ? <EmagMarketLabel market={marketplace.market} /> : marketplace.market}</Detail>
               <Detail label="Integracja">{marketplace.isEnabled ? 'Włączona' : 'Wyłączona'}</Detail>
               <Detail label="Status połączenia">{STATUS_LABELS[marketplace.status]}</Detail>
               <Detail label="Ważność tokenu dostępu">{formatDate(marketplace.accessTokenExpiresAt)}</Detail>
