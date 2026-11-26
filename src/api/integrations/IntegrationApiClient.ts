@@ -3,7 +3,7 @@ import type { ConnectionCheckResponse, IntegrationsResponse } from '@/types/inte
 
 export const integrationApiClient = {
   async checkConnection(id: string): Promise<ConnectionCheckResponse> {
-    const { data } = await apiHttp.post<ConnectionCheckResponse>(`/integrations/marketplace/${id}/check-status`, undefined, { showErrorToast: false })
+    const { data } = await apiHttp.post<ConnectionCheckResponse>(`/integrations/marketplace/${id}/check-status`, undefined, { showErrorToast: false, timeout: 90_000 })
     return data
   },
 

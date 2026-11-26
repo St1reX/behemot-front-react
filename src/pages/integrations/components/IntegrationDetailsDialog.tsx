@@ -99,7 +99,7 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated, onRecon
             </dl>
             <p className="text-xs text-muted-foreground">Widok prezentuje ostatnio zapisane dane konta. Synchronizacja ofert nie jest jeszcze dostępna.</p>
             {marketplace.channel === 'EMAG' && <p className="text-xs text-muted-foreground">eMAG potwierdza dostęp do API przez odczyt liczby ofert. Nazwa konfiguracji pochodzi z e-maila konta; publiczne API nie udostępnia profilu sprzedawcy.</p>}
-            {marketplace.channel === 'ALLEGRO' && <p className="text-xs text-muted-foreground">Token nie jest odświeżany automatycznie. Po jego wygaśnięciu lub cofnięciu dostępu w Allegro połącz konto ponownie.</p>}
+            {marketplace.channel === 'ALLEGRO' && <p className="text-xs text-muted-foreground">Token jest odświeżany automatycznie podczas korzystania z integracji. Jeśli Allegro odrzuci token odświeżania, połącz konto ponownie.</p>}
           </>
         )}
         {checkError && <p role="alert" className="text-sm text-destructive">{checkError}</p>}

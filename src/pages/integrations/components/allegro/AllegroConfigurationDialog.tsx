@@ -64,7 +64,7 @@ export function AllegroConfigurationDialog({ integration, onClose }: { integrati
           )}
           <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
             {integration ? `Zaloguj się do konta ${integration.externalUsername ?? integration.name}. ` : ''}
-            Dostęp obejmuje odczyt danych konta. Dane aplikacji i tokeny zapisujemy w zaszyfrowanej postaci. Po wygaśnięciu tokenu połącz konto ponownie.
+            Dostęp obejmuje odczyt danych konta. Dane aplikacji i tokeny zapisujemy w zaszyfrowanej postaci. Token dostępu jest odświeżany automatycznie podczas korzystania z integracji.
           </p>
           <FormActions isPending={mutation.isPending} error={mutation.error?.message ?? configuration.error?.message} onCancel={onClose}
             submitDisabled={!configuration.data} submitLabel="Przejdź do Allegro" pendingLabel="Przekierowywanie do Allegro…" />
