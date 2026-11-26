@@ -14,6 +14,7 @@ export interface MarketplaceIntegration {
   id: string
   name: string
   channel: MarketplaceIntegrationChannel
+  baseUrl: string | null
   externalAccountId: string | null
   externalUsername: string | null
   environment: IntegrationEnvironment

@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Database, FolderOpen, Plus, Store, Trash2 } from 'lucide-react'
+import { ChevronRight, Database, FolderOpen, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
 import erliLogo from '@/assets/images/erli-logo.png'
+import prestashopLogo from '@/assets/images/presta-logo.png'
 import { ListSkeleton } from '@/components/common/ListSkeleton'
 import { ListToolbar } from '@/components/common/ListToolbar'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -19,11 +20,14 @@ import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
 import { STATUS_CLASSES, STATUS_LABELS } from './integration.constants'
 import { ErliConfigurationDialog } from './components/erli/ErliConfigurationDialog'
 import { IntegrationDeleteDialog } from './components/IntegrationDeleteDialog'
+import { PrestashopConfigurationDialog } from './components/prestashop/PrestashopConfigurationDialog'
+import { MarketplaceLogo } from './components/MarketplaceLogo'
 
 export function IntegrationsPage() {
   const { requirePrivilege } = useAccess()
   const [selected, setSelected] = useState<SelectedIntegration | null>(null)
   const [erliConfigurationOpen, setErliConfigurationOpen] = useState(false)
+  const [prestashopConfigurationOpen, setPrestashopConfigurationOpen] = useState(false)
   const [deleting, setDeleting] = useState<MarketplaceIntegration | null>(null)
   const canCreate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`)
   const canDelete = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.DELETE}`)
@@ -47,6 +51,18 @@ export function IntegrationsPage() {
             <p className="text-sm text-muted-foreground">Dodaj konto sprzedawcy za pomocą tokenu API.</p>
             {canCreate ? (
               <Button type="button" variant="outline" className="w-full" onClick={() => setErliConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto ERLI</Button>
+            ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <img src={prestashopLogo} alt="PrestaShop" className="h-16 w-32 shrink-0 object-contain" />
+              <div><h2 className="text-base font-semibold">PrestaShop</h2><p className="text-xs text-muted-foreground">Sklep internetowy</p></div>
+            </div>
+            <p className="text-sm text-muted-foreground">Połącz własny sklep, podając jego adres i klucz API.</p>
+            {canCreate ? (
+              <Button type="button" variant="outline" className="w-full" onClick={() => setPrestashopConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj sklep PrestaShop</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
           </CardContent>
         </Card>
@@ -100,7 +116,7 @@ export function IntegrationsPage() {
                                 {integrations.map((integration) => (
                                   <li key={integration.id} className="flex items-center gap-1">
                                     <Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
-                                      {integration.channel === 'ERLI' ? <img src={erliLogo} alt="ERLI" className="h-8 w-16 shrink-0 object-contain" /> : <Store aria-hidden="true" className="shrink-0 text-muted-foreground" />}
+                                      <MarketplaceLogo channel={integration.channel} className="h-8 w-16 shrink-0 object-contain" />
                                       <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === 'SANDBOX' && ' · Sandbox'}</span></span>
                                       <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
                                       <ChevronRight aria-hidden="true" className="shrink-0" />
@@ -127,6 +143,7 @@ export function IntegrationsPage() {
       </Card>
       {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected({ kind: 'marketplace', integration })} />}
       {erliConfigurationOpen && canCreate && <ErliConfigurationDialog onClose={() => setErliConfigurationOpen(false)} />}
+      {prestashopConfigurationOpen && canCreate && <PrestashopConfigurationDialog onClose={() => setPrestashopConfigurationOpen(false)} />}
       {deleting && canDelete && <IntegrationDeleteDialog integration={deleting} onClose={() => setDeleting(null)} />}
     </div>
   )

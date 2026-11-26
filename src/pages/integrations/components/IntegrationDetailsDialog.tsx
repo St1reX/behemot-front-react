@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Database, RefreshCw, Store } from 'lucide-react'
+import { Database, RefreshCw } from 'lucide-react'
 import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
-import erliLogo from '@/assets/images/erli-logo.png'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAccess } from '@/hooks/useAccess'
@@ -12,6 +11,7 @@ import { ENTITIES } from '@/shared/constants/entities'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import type { BolmaIntegration, IntegrationsResponse, MarketplaceIntegration } from '@/types/integrations/integration.types'
 import { STATUS_LABELS } from '../integration.constants'
+import { MarketplaceLogo } from './MarketplaceLogo'
 
 export type SelectedIntegration =
   | { kind: 'bolma'; integration: BolmaIntegration }
@@ -36,10 +36,9 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
   onUpdated: (integration: MarketplaceIntegration) => void
 }) {
   const marketplace = selected.kind === 'marketplace' ? selected.integration : null
-  const Icon = marketplace ? Store : Database
   const queryClient = useQueryClient()
   const { requirePrivilege } = useAccess()
-  const canCheck = marketplace?.channel === 'ERLI' && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
+  const canCheck = (marketplace?.channel === 'ERLI' || marketplace?.channel === 'PRESTASHOP') && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
   const mutation = useMutation({
     mutationFn: (id: string) => integrationApiClient.checkConnection(id),
     retry: false,
@@ -58,8 +57,8 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
     <Dialog open onOpenChange={(open) => { if (!open && !mutation.isPending) onClose() }}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto font-sans sm:max-w-2xl" showCloseButton={!mutation.isPending}>
         <DialogHeader className="pr-8">
-          {marketplace?.channel === 'ERLI' ? <img src={erliLogo} alt="ERLI" className="mb-2 h-16 w-32 object-contain" /> : <div className="mb-2 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Icon aria-hidden="true" className="size-5" />
+          {marketplace ? <MarketplaceLogo channel={marketplace.channel} className="mb-2 h-16 w-40 object-contain" /> : <div className="mb-2 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Database aria-hidden="true" className="size-5" />
           </div>}
           <DialogTitle>{selected.integration.name}</DialogTitle>
           <DialogDescription>
@@ -82,6 +81,7 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
           <>
             <dl className="grid gap-3 sm:grid-cols-2">
               <Detail label="Kanał">{CHANNEL_LABELS[marketplace.channel]}</Detail>
+              {marketplace.baseUrl && <Detail label="Adres API">{marketplace.baseUrl}</Detail>}
               <Detail label="Środowisko">{marketplace.environment === 'SANDBOX' ? 'Testowe (Sandbox)' : 'Produkcyjne'}</Detail>
               <Detail label="Identyfikator konta">{marketplace.externalAccountId}</Detail>
               <Detail label="Nazwa użytkownika">{marketplace.externalUsername}</Detail>
