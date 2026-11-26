@@ -32,3 +32,8 @@ export interface IntegrationsResponse {
   bolma: BolmaIntegration
   marketplaces: MarketplaceIntegration[]
 }
+
+export interface ConnectionCheckResponse {
+  integration: MarketplaceIntegration
+  error: string | null
+}

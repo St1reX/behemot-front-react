@@ -1,9 +1,16 @@
 import type { ReactNode } from 'react'
-import { Database, Store } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Database, RefreshCw, Store } from 'lucide-react'
+import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
 import erliLogo from '@/assets/images/erli-logo.png'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { useAccess } from '@/hooks/useAccess'
+import { toast } from '@/lib/toast'
+import { ACTIONS } from '@/shared/constants/actions'
+import { ENTITIES } from '@/shared/constants/entities'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
-import type { BolmaIntegration, MarketplaceIntegration } from '@/types/integrations/integration.types'
+import type { BolmaIntegration, IntegrationsResponse, MarketplaceIntegration } from '@/types/integrations/integration.types'
 import { STATUS_LABELS } from '../integration.constants'
 
 export type SelectedIntegration =
@@ -23,13 +30,33 @@ function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString('pl-PL') : 'Brak danych'
 }
 
-export function IntegrationDetailsDialog({ selected, onClose }: { selected: SelectedIntegration; onClose: () => void }) {
+export function IntegrationDetailsDialog({ selected, onClose, onUpdated }: {
+  selected: SelectedIntegration
+  onClose: () => void
+  onUpdated: (integration: MarketplaceIntegration) => void
+}) {
   const marketplace = selected.kind === 'marketplace' ? selected.integration : null
   const Icon = marketplace ? Store : Database
+  const queryClient = useQueryClient()
+  const { requirePrivilege } = useAccess()
+  const canCheck = marketplace?.channel === 'ERLI' && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
+  const mutation = useMutation({
+    mutationFn: (id: string) => integrationApiClient.checkConnection(id),
+    retry: false,
+    onSuccess: ({ integration, error }) => {
+      queryClient.setQueryData<IntegrationsResponse>(['integrations'], (previous) => previous ? {
+        ...previous,
+        marketplaces: previous.marketplaces.map((item) => item.id === integration.id ? integration : item),
+      } : previous)
+      onUpdated(integration)
+      toast.add({ type: error ? 'error' : 'success', title: error ? 'Nie udało się połączyć z integracją.' : 'Połączenie działa. Dane konta zostały odświeżone.' })
+    },
+  })
+  const checkError = mutation.error?.message ?? mutation.data?.error
 
   return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto font-sans sm:max-w-2xl">
+    <Dialog open onOpenChange={(open) => { if (!open && !mutation.isPending) onClose() }}>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto font-sans sm:max-w-2xl" showCloseButton={!mutation.isPending}>
         <DialogHeader className="pr-8">
           {marketplace?.channel === 'ERLI' ? <img src={erliLogo} alt="ERLI" className="mb-2 h-16 w-32 object-contain" /> : <div className="mb-2 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Icon aria-hidden="true" className="size-5" />
@@ -68,10 +95,19 @@ export function IntegrationDetailsDialog({ selected, onClose }: { selected: Sele
               <Detail label="Data dodania">{formatDate(marketplace.createdAt)}</Detail>
               <Detail label="Ostatnia aktualizacja">{formatDate(marketplace.updatedAt)}</Detail>
             </dl>
-            <p className="text-xs text-muted-foreground">Widok prezentuje dane zapisane w systemie. Obsługa połączeń i synchronizacji zostanie dodana w kolejnym etapie.</p>
+            <p className="text-xs text-muted-foreground">Widok prezentuje ostatnio zapisane dane konta. Synchronizacja ofert nie jest jeszcze dostępna.</p>
           </>
         )}
-        <DialogFooter showCloseButton />
+        {checkError && <p role="alert" className="text-sm text-destructive">{checkError}</p>}
+        <DialogFooter>
+          <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onClose}>Zamknij</Button>
+          {canCheck && marketplace && (
+            <Button type="button" className="h-auto min-h-9 whitespace-normal" disabled={mutation.isPending} onClick={() => mutation.mutate(marketplace.id)}>
+              <RefreshCw aria-hidden="true" className={mutation.isPending ? 'shrink-0 animate-spin motion-reduce:animate-none' : 'shrink-0'} />
+              {mutation.isPending ? 'Sprawdzanie połączenia…' : 'Sprawdź połączenie i odśwież dane'}
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

@@ -23,7 +23,7 @@ export function ErliConfigurationDialog({ onClose }: { onClose: () => void }) {
     onSuccess: async () => {
       reset()
       await queryClient.invalidateQueries({ queryKey: ['integrations'] })
-      toast.add({ type: 'success', title: 'Konfiguracja ERLI została zapisana.' })
+      toast.add({ type: 'success', title: 'Konto ERLI zostało połączone.' })
       onClose()
     },
   })
@@ -45,8 +45,8 @@ export function ErliConfigurationDialog({ onClose }: { onClose: () => void }) {
             <p id="erli-token-help" className="text-xs text-muted-foreground">Podaj sam token, bez prefiksu „Bearer”. Zostanie zapisany w zaszyfrowanej postaci.</p>
             {errors.token && <p id="erli-token-error" className="text-xs text-destructive">{errors.token.message}</p>}
           </div>
-          <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">Zapis dodaje konfigurację konta. Połączenie z ERLI nie jest jeszcze sprawdzane.</p>
-          <FormActions isPending={mutation.isPending} error={mutation.error?.message} onCancel={onClose} submitLabel="Zapisz konfigurację" />
+          <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">Podczas zapisu sprawdzimy token i pobierzemy nazwę oraz identyfikator Twojego sklepu z ERLI.</p>
+          <FormActions isPending={mutation.isPending} error={mutation.error?.message} onCancel={onClose} submitLabel="Połącz konto" pendingLabel="Łączenie z ERLI…" />
         </form>
       </DialogContent>
     </Dialog>

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Database, FolderOpen, Plus, Store } from 'lucide-react'
+import { ChevronRight, Database, FolderOpen, Plus, Store, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
 import erliLogo from '@/assets/images/erli-logo.png'
@@ -13,17 +13,20 @@ import { useAccess } from '@/hooks/useAccess'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegration, MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
 import { IntegrationDetailsDialog } from './components/IntegrationDetailsDialog'
 import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
 import { STATUS_CLASSES, STATUS_LABELS } from './integration.constants'
 import { ErliConfigurationDialog } from './components/erli/ErliConfigurationDialog'
+import { IntegrationDeleteDialog } from './components/IntegrationDeleteDialog'
 
 export function IntegrationsPage() {
   const { requirePrivilege } = useAccess()
   const [selected, setSelected] = useState<SelectedIntegration | null>(null)
   const [erliConfigurationOpen, setErliConfigurationOpen] = useState(false)
+  const [deleting, setDeleting] = useState<MarketplaceIntegration | null>(null)
   const canCreate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`)
+  const canDelete = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.DELETE}`)
   const query = useQuery({
     queryKey: ['integrations'],
     queryFn: ({ signal }) => integrationApiClient.list(signal),
@@ -95,13 +98,18 @@ export function IntegrationsPage() {
                             <CollapsibleContent>
                               <ul className="mt-1 ml-5 space-y-1 border-l pl-4">
                                 {integrations.map((integration) => (
-                                  <li key={integration.id}>
-                                    <Button variant="ghost" className="h-auto w-full justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
+                                  <li key={integration.id} className="flex items-center gap-1">
+                                    <Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
                                       {integration.channel === 'ERLI' ? <img src={erliLogo} alt="ERLI" className="h-8 w-16 shrink-0 object-contain" /> : <Store aria-hidden="true" className="shrink-0 text-muted-foreground" />}
                                       <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === 'SANDBOX' && ' · Sandbox'}</span></span>
                                       <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
                                       <ChevronRight aria-hidden="true" className="shrink-0" />
                                     </Button>
+                                    {canDelete && (
+                                      <Button type="button" variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" title="Usuń integrację" aria-label={`Usuń integrację ${integration.name}`} onClick={() => setDeleting(integration)}>
+                                        <Trash2 aria-hidden="true" />
+                                      </Button>
+                                    )}
                                   </li>
                                 ))}
                               </ul>
@@ -117,8 +125,9 @@ export function IntegrationsPage() {
           )}
         </CardContent>
       </Card>
-      {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} />}
+      {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected({ kind: 'marketplace', integration })} />}
       {erliConfigurationOpen && canCreate && <ErliConfigurationDialog onClose={() => setErliConfigurationOpen(false)} />}
+      {deleting && canDelete && <IntegrationDeleteDialog integration={deleting} onClose={() => setDeleting(null)} />}
     </div>
   )
 }
