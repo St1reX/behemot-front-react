@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from '@/shared/constants/pagination'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowRight, Pencil, Plus, SearchX } from 'lucide-react'
 import { useState } from 'react'
@@ -13,13 +14,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
-import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
+import { MARKETPLACE_INTEGRATION_CHANNELS, MARKETPLACE_INTEGRATION_CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import { formatFitment, formatPrice } from './product.utils'
 
-const PAGE_SIZE = 25
 export function ProductsPage() {
   const { requirePrivilege } = useAccess()
   const [search, setSearch] = useState('')
@@ -35,7 +34,7 @@ export function ProductsPage() {
     return matchesSearch && (!channel || product.externalListings.some((listing) => listing.channel === channel))
       && (!stock || (stock === 'available' ? product.quantity !== null && product.quantity > 0 : stock === 'unknown' ? product.quantity === null : product.quantity === 0))
   })
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageCount = Math.max(1, Math.ceil(filtered.length / DEFAULT_PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const canUpdate = requirePrivilege(`${ENTITIES.PRODUCT}:${ACTIONS.UPDATE}`)
   return <div className="space-y-6">
@@ -66,8 +65,8 @@ export function ProductsPage() {
         <ListToolbar search={{ value: search, onChange: (value) => { setSearch(value); setPage(1) }, label: 'Szukaj produktów', placeholder: 'SKU, nazwa, EAN, OEM, pojazd…' }} isFetching={query.isFetching} onRefresh={() => { void query.refetch() }} summary={!query.isPending && !query.error && `${filtered.length} z ${products.length} produktów`}>
           <NativeSelect aria-label="Kanał sprzedaży" value={channel} onChange={(event) => { setChannel(event.target.value); setPage(1) }}>
             <NativeSelectOption value="">Wszystkie integracje</NativeSelectOption>
-            {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((key) => <NativeSelectOption key={key} value={key}>
-              {CHANNEL_LABELS[key]}
+            {Object.values(MARKETPLACE_INTEGRATION_CHANNELS).map((key) => <NativeSelectOption key={key} value={key}>
+              {MARKETPLACE_INTEGRATION_CHANNEL_LABELS[key]}
             </NativeSelectOption>)}
           </NativeSelect>
           <NativeSelect aria-label="Stan magazynowy" value={stock} onChange={(event) => { setStock(event.target.value); setPage(1) }}>
@@ -98,7 +97,7 @@ export function ProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((product) => <TableRow key={product.id}>
+                {filtered.slice((currentPage - 1) * DEFAULT_PAGE_SIZE, currentPage * DEFAULT_PAGE_SIZE).map((product) => <TableRow key={product.id}>
                   <TableCell className="min-w-60 max-w-96 pl-5">
                     <div className="flex items-center gap-3">
                       <ProductImage src={product.imagesUrls[0]} alt="" lazy className="size-14 shrink-0" />

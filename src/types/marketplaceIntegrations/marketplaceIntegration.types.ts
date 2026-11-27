@@ -1,6 +1,4 @@
-export type MarketplaceIntegrationChannel = 'ALLEGRO' | 'EMAG' | 'ERLI' | 'PRESTASHOP'
-export type IntegrationEnvironment = 'PRODUCTION' | 'SANDBOX'
-export type MarketplaceIntegrationStatus = 'PENDING' | 'CONNECTED' | 'ERROR'
+import type { IntegrationEnvironment, MarketplaceIntegrationChannel, MarketplaceIntegrationStatus } from '@/shared/constants/marketplaceIntegrations'
 
 export interface MarketplaceIntegration {
   id: string

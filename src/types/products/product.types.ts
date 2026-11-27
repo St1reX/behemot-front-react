@@ -1,7 +1,8 @@
-import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
+import type { MarketplaceIntegrationChannel } from '@/shared/constants/marketplaceIntegrations'
+import type { IntegrationSyncStatus } from '@/shared/constants/integrationSyncStatuses'
+import type { ProductSide } from '@/shared/constants/productSides'
 import type { CarGeneration, CarModel } from '@/types/vehicles/vehicle.types'
 
-export type ProductSide = 'LEFT' | 'RIGHT' | 'BOTH' | 'NONE'
 export interface ProductFitment {
   id: string
   isPrimary: boolean
@@ -16,7 +17,7 @@ export interface ProductExternalListing {
   lastSyncedContentVersion: number | null
   channel: MarketplaceIntegrationChannel
   externalId: string | null
-  syncStatus: 'PENDING' | 'SYNCED' | 'FAILED'
+  syncStatus: IntegrationSyncStatus
   lastSyncedAt: string | null
   lastError: string | null
 }

@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from '@/shared/constants/pagination'
 import { getActionLabel } from '@/shared/constants/actions'
 import { getEntityLabel } from '@/shared/constants/entities'
 import { OPERATION_STATUS_CLASSES, OPERATION_STATUS_LABELS } from '@/shared/constants/operationStatuses'
@@ -17,8 +18,6 @@ import { formatAuditDate } from './auditLog.utils'
 import { AuditLogDetailsDialog } from './components/AuditLogDetailsDialog'
 import { AuditLogFilters } from './components/AuditLogFilters'
 
-const PAGE_SIZE = 25
-
 export function AuditLogsPage() {
   const [filters, setFilters] = useState<Filters>({})
   const [page, setPage] = useState(1)
@@ -27,10 +26,10 @@ export function AuditLogsPage() {
   const activeFilterCount = Object.values(filters).filter(Boolean).length
   const query = useQuery({
     queryKey: ['audit-logs', 'list', filters, page],
-    queryFn: ({ signal }) => auditLogApiClient.list({ ...filters, page, pageSize: PAGE_SIZE }, signal),
+    queryFn: ({ signal }) => auditLogApiClient.list({ ...filters, page, pageSize: DEFAULT_PAGE_SIZE }, signal),
     retry: false,
   })
-  const totalPages = Math.max(1, Math.ceil((query.data?.total ?? 0) / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil((query.data?.total ?? 0) / DEFAULT_PAGE_SIZE))
 
   return (
     <div className="space-y-6">
@@ -68,7 +67,7 @@ export function AuditLogsPage() {
             </Table>
           )}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t px-5 py-4 text-xs text-muted-foreground">
-            <span>{query.data ? `Strona ${page} z ${totalPages} · ${PAGE_SIZE} wpisów na stronę` : `Strona ${page}`}</span>
+            <span>{query.data ? `Strona ${page} z ${totalPages} · ${DEFAULT_PAGE_SIZE} wpisów na stronę` : `Strona ${page}`}</span>
             <div className="flex gap-2"><Button type="button" variant="outline" size="sm" disabled={page === 1 || query.isFetching} onClick={() => setPage(page - 1)}><ChevronLeft aria-hidden="true" />Poprzednia</Button><Button type="button" variant="outline" size="sm" disabled={!query.data || page >= totalPages || query.isFetching} onClick={() => setPage(page + 1)}>Następna<ChevronRight aria-hidden="true" /></Button></div>
           </div>
         </CardContent>

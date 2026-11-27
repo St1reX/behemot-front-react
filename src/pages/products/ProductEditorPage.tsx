@@ -31,7 +31,7 @@ import type { Product, ProductImageFiles } from '@/types/products/product.types'
 import { ProductFitmentsEditor } from './components/ProductFitmentsEditor'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
-import { SIDE_LABELS } from './product.constants'
+import { PRODUCT_SIDE_LABELS, PRODUCT_SIDES } from '@/shared/constants/productSides'
 import { formatPrice } from './product.utils'
 
 const imageUploadLimits = { maxFiles: 20, maxFileSizeMb: 10 }
@@ -77,7 +77,7 @@ function initialValues(product?: Product): DefaultValues<ProductInput> {
     })),
   } : {
     sku: '', ean: null, oem: [], customName: null, customSummary: null, customDescription: null, internalNote: null,
-    price: undefined, side: 'NONE', weight: undefined, length: undefined, width: undefined, height: null,
+    price: undefined, side: PRODUCT_SIDES.NONE, weight: undefined, length: undefined, width: undefined, height: null,
     warehouseLocation: '', warehouseId: '', producerId: '', departmentId: '', listingTemplateId: '',
     imagesUrls: [], descriptionImagesUrls: [], productFitments: [],
   }
@@ -239,9 +239,9 @@ function ProductForm({ product }: { product?: Product }) {
                 {select('departmentId', 'Dział *', departments.data ?? [], product?.department, canRead(ENTITIES.DEPARTMENT))}
                 {select('producerId', 'Producent *', producers.data ?? [], product?.producer, canRead(ENTITIES.PRODUCER))}
                 {input('ean', 'EAN', false, true)}
-                {field('side', 'Strona', <NativeSelect id="product-side" defaultValue={product ? product.side ?? '' : 'NONE'} className="w-full" {...register('side')}>
+                {field('side', 'Strona', <NativeSelect id="product-side" defaultValue={product ? product.side ?? '' : PRODUCT_SIDES.NONE} className="w-full" {...register('side')}>
                   <NativeSelectOption value="" disabled>Nie podano</NativeSelectOption>
-                  {Object.entries(SIDE_LABELS).map(([key, label]) => <NativeSelectOption key={key} value={key}>
+                  {Object.entries(PRODUCT_SIDE_LABELS).map(([key, label]) => <NativeSelectOption key={key} value={key}>
                     {label}
                   </NativeSelectOption>)}
                 </NativeSelect>)}

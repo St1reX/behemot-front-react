@@ -12,13 +12,18 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { useAccess } from '@/hooks/useAccess'
-import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
+import {
+  INTEGRATION_ENVIRONMENTS,
+  MARKETPLACE_INTEGRATION_CHANNELS,
+  MARKETPLACE_INTEGRATION_CHANNEL_LABELS,
+  MARKETPLACE_INTEGRATION_STATUS_CLASSES,
+  MARKETPLACE_INTEGRATION_STATUS_LABELS,
+} from '@/shared/constants/marketplaceIntegrations'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import type { MarketplaceIntegration, MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
+import type { MarketplaceIntegration } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { IntegrationDetailsDialog } from './components/IntegrationDetailsDialog'
 import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
-import { STATUS_CLASSES, STATUS_LABELS } from './integration.constants'
 import { ErliConfigurationDialog } from './components/erli/ErliConfigurationDialog'
 import { IntegrationDeleteDialog } from './components/IntegrationDeleteDialog'
 import { PrestashopConfigurationDialog } from './components/prestashop/PrestashopConfigurationDialog'
@@ -147,7 +152,7 @@ export function IntegrationsPage() {
                   <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Nie dodano jeszcze żadnych integracji marketplace.</p>
                 ) : (
                   <ul className="space-y-2">
-                    {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((channel) => {
+                    {Object.values(MARKETPLACE_INTEGRATION_CHANNELS).map((channel) => {
                       const integrations = query.data.filter((integration) => integration.channel === channel)
                       if (!integrations.length) return null
                       return (
@@ -156,7 +161,7 @@ export function IntegrationsPage() {
                             <CollapsibleTrigger render={<Button variant="ghost" className="w-full justify-start gap-3" />}>
                               <ChevronRight aria-hidden="true" className="transition-transform group-data-open/channel:rotate-90" />
                               <FolderOpen aria-hidden="true" className="text-muted-foreground" />
-                              <span>{CHANNEL_LABELS[channel]}</span>
+                              <span>{MARKETPLACE_INTEGRATION_CHANNEL_LABELS[channel]}</span>
                               <span className="ml-auto text-xs text-muted-foreground">{integrations.length}</span>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
@@ -165,8 +170,8 @@ export function IntegrationsPage() {
                                   <li key={integration.id} className="flex items-center gap-1">
                                     <Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
                                       <MarketplaceLogo channel={integration.channel} className="h-8 w-16 shrink-0 object-contain" />
-                                      <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === 'SANDBOX' && ' · Sandbox'}</span></span>
-                                      <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
+                                      <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === INTEGRATION_ENVIRONMENTS.SANDBOX && ' · Sandbox'}</span></span>
+                                      <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? MARKETPLACE_INTEGRATION_STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? MARKETPLACE_INTEGRATION_STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
                                       <ChevronRight aria-hidden="true" className="shrink-0" />
                                     </Button>
                                     {canDelete && (

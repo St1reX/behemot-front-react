@@ -8,10 +8,14 @@ import { useAccess } from '@/hooks/useAccess'
 import { toast } from '@/lib/toast'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
+import {
+  INTEGRATION_ENVIRONMENTS,
+  MARKETPLACE_INTEGRATION_CHANNELS,
+  MARKETPLACE_INTEGRATION_CHANNEL_LABELS,
+  MARKETPLACE_INTEGRATION_STATUS_LABELS,
+} from '@/shared/constants/marketplaceIntegrations'
 import type { BolmaIntegration } from '@/types/bolma/bolma.types'
 import type { MarketplaceIntegration } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
-import { STATUS_LABELS } from '../integration.constants'
 import { MarketplaceLogo } from './MarketplaceLogo'
 import { EmagMarketLabel } from './emag/EmagMarketLabel'
 
@@ -82,14 +86,14 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated, onRecon
         ) : marketplace && (
           <>
             <dl className="grid gap-3 sm:grid-cols-2">
-              <Detail label="Kanał">{CHANNEL_LABELS[marketplace.channel]}</Detail>
+              <Detail label="Kanał">{MARKETPLACE_INTEGRATION_CHANNEL_LABELS[marketplace.channel]}</Detail>
               {marketplace.baseUrl && <Detail label="Adres API">{marketplace.baseUrl}</Detail>}
-              <Detail label="Środowisko">{marketplace.environment === 'SANDBOX' ? 'Testowe (Sandbox)' : 'Produkcyjne'}</Detail>
+              <Detail label="Środowisko">{marketplace.environment === INTEGRATION_ENVIRONMENTS.SANDBOX ? 'Testowe (Sandbox)' : 'Produkcyjne'}</Detail>
               <Detail label="Identyfikator konta">{marketplace.externalAccountId}</Detail>
               <Detail label="Nazwa użytkownika">{marketplace.externalUsername}</Detail>
-              <Detail label="Rynek">{marketplace.channel === 'EMAG' ? <EmagMarketLabel market={marketplace.market} /> : marketplace.market}</Detail>
+              <Detail label="Rynek">{marketplace.channel === MARKETPLACE_INTEGRATION_CHANNELS.EMAG ? <EmagMarketLabel market={marketplace.market} /> : marketplace.market}</Detail>
               <Detail label="Integracja">{marketplace.isEnabled ? 'Włączona' : 'Wyłączona'}</Detail>
-              <Detail label="Status połączenia">{STATUS_LABELS[marketplace.status]}</Detail>
+              <Detail label="Status połączenia">{MARKETPLACE_INTEGRATION_STATUS_LABELS[marketplace.status]}</Detail>
               <Detail label="Ważność tokenu dostępu">{formatDate(marketplace.accessTokenExpiresAt)}</Detail>
               <Detail label="Ostatnie sprawdzenie połączenia">{formatDate(marketplace.lastConnectionCheckAt)}</Detail>
               <Detail label="Ostatnia udana synchronizacja">{formatDate(marketplace.lastSuccessfulSyncAt)}</Detail>
@@ -98,14 +102,14 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated, onRecon
               <Detail label="Ostatnia aktualizacja">{formatDate(marketplace.updatedAt)}</Detail>
             </dl>
             <p className="text-xs text-muted-foreground">Widok prezentuje ostatnio zapisane dane konta. Synchronizacja ofert nie jest jeszcze dostępna.</p>
-            {marketplace.channel === 'EMAG' && <p className="text-xs text-muted-foreground">eMAG potwierdza dostęp do API przez odczyt liczby ofert. Nazwa konfiguracji pochodzi z e-maila konta; publiczne API nie udostępnia profilu sprzedawcy.</p>}
-            {marketplace.channel === 'ALLEGRO' && <p className="text-xs text-muted-foreground">Token jest odświeżany automatycznie podczas korzystania z integracji. Jeśli Allegro odrzuci token odświeżania, połącz konto ponownie.</p>}
+            {marketplace.channel === MARKETPLACE_INTEGRATION_CHANNELS.EMAG && <p className="text-xs text-muted-foreground">eMAG potwierdza dostęp do API przez odczyt liczby ofert. Nazwa konfiguracji pochodzi z e-maila konta; publiczne API nie udostępnia profilu sprzedawcy.</p>}
+            {marketplace.channel === MARKETPLACE_INTEGRATION_CHANNELS.ALLEGRO && <p className="text-xs text-muted-foreground">Token jest odświeżany automatycznie podczas korzystania z integracji. Jeśli Allegro odrzuci token odświeżania, połącz konto ponownie.</p>}
           </>
         )}
         {checkError && <p role="alert" className="text-sm text-destructive">{checkError}</p>}
         <DialogFooter>
           <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onClose}>Zamknij</Button>
-          {canCheck && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`) && marketplace?.channel === 'ALLEGRO' && <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => onReconnect(marketplace)}>Połącz ponownie</Button>}
+          {canCheck && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.CREATE}`) && marketplace?.channel === MARKETPLACE_INTEGRATION_CHANNELS.ALLEGRO && <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => onReconnect(marketplace)}>Połącz ponownie</Button>}
           {canCheck && marketplace && (
             <Button type="button" className="h-auto min-h-9 whitespace-normal" disabled={mutation.isPending} onClick={() => mutation.mutate(marketplace.id)}>
               <RefreshCw aria-hidden="true" className={mutation.isPending ? 'shrink-0 animate-spin motion-reduce:animate-none' : 'shrink-0'} />

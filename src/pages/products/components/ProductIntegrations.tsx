@@ -1,20 +1,20 @@
 import { CircleCheck, CircleDashed, Clock3, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { INTEGRATION_SYNC_STATUSES } from '@/shared/constants/integrationSyncStatuses'
 import type { ProductExternalListing } from '@/types/products/product.types'
-import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
-import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
+import { MARKETPLACE_INTEGRATION_CHANNELS, MARKETPLACE_INTEGRATION_CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 
 export function ProductIntegrations({ listings, contentVersion, isLegacy, compact = false }: { listings: ProductExternalListing[]; contentVersion: number; isLegacy: boolean; compact?: boolean }) {
   return <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-4', compact && 'flex flex-wrap gap-1.5')}>
-    {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((channel) => {
+    {Object.values(MARKETPLACE_INTEGRATION_CHANNELS).map((channel) => {
       const offers = listings.filter((listing) => listing.channel === channel)
       const published = offers.filter((listing) => listing.externalId).length
-      const failed = offers.some((listing) => listing.syncStatus === 'FAILED')
-      const synced = !isLegacy && offers.length > 0 && offers.every((listing) => Boolean(listing.externalId) && listing.syncStatus === 'SYNCED' && listing.lastSyncedContentVersion === contentVersion)
+      const failed = offers.some((listing) => listing.syncStatus === INTEGRATION_SYNC_STATUSES.FAILED)
+      const synced = !isLegacy && offers.length > 0 && offers.every((listing) => Boolean(listing.externalId) && listing.syncStatus === INTEGRATION_SYNC_STATUSES.SYNCED && listing.lastSyncedContentVersion === contentVersion)
       const pending = !isLegacy && offers.length > 0 && !failed && !synced
       const Icon = failed ? TriangleAlert : pending ? Clock3 : synced ? CircleCheck : CircleDashed
       const label = isLegacy && offers.length ? 'Oferty z importu — zarządzanie nieprzejęte' : failed ? 'Błąd synchronizacji' : pending ? 'Oczekuje na synchronizację' : synced ? 'Zsynchronizowano' : offers.length ? 'Bez identyfikatora oferty' : 'Brak ofert'
-      return <div key={channel} title={`${CHANNEL_LABELS[channel]}: ${label}; oferty zewnętrzne: ${published} / ${offers.length}`} className={cn(
+      return <div key={channel} title={`${MARKETPLACE_INTEGRATION_CHANNEL_LABELS[channel]}: ${label}; oferty zewnętrzne: ${published} / ${offers.length}`} className={cn(
         'min-w-0 rounded-xl border bg-muted/20 p-4',
         compact && 'flex items-center gap-1 rounded-md px-2 py-1 text-[11px]',
         failed ? 'border-destructive/25 text-destructive' : offers.length ? 'border-primary/25 text-primary' : 'text-muted-foreground',
@@ -23,7 +23,7 @@ export function ProductIntegrations({ listings, contentVersion, isLegacy, compac
         <div className="flex items-center gap-2">
           <Icon aria-hidden="true" className={compact ? 'size-3' : 'size-4'} />
           <span className="font-medium">
-            {CHANNEL_LABELS[channel]}
+            {MARKETPLACE_INTEGRATION_CHANNEL_LABELS[channel]}
           </span>
           {compact && published > 0 && <span>
             {published}

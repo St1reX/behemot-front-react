@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PRODUCT_SIDES } from '@/shared/constants/productSides'
 
 const decimal = z.number({ error: 'Podaj liczbę.' }).min(0, 'Wartość nie może być ujemna.').max(9999.99, 'Maksymalna wartość to 9999,99.').refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 0.000001, 'Maksymalnie dwa miejsca po przecinku.')
 const dimension = decimal.refine((value) => value > 0, 'Wartość musi być większa od zera.')
@@ -13,7 +14,7 @@ export const productSchema = z.object({
   customDescription: nullableText,
   internalNote: nullableText,
   price: decimal,
-  side: z.enum(['LEFT', 'RIGHT', 'BOTH', 'NONE']),
+  side: z.enum(PRODUCT_SIDES),
   weight: dimension, length: dimension, width: dimension, height: dimension.nullable(),
   warehouseLocation: z.string().trim().min(1, 'Podaj lokalizację w magazynie.'),
   warehouseId: uuid, producerId: uuid, departmentId: uuid, listingTemplateId: uuid,

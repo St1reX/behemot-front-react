@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from '@/shared/constants/pagination'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, ChevronRight, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -15,8 +16,6 @@ import { VehicleEditorDialog } from './components/VehicleEditorDialog'
 import { VehicleList } from './components/VehicleList'
 import { VEHICLE_ENTITIES } from './vehicle.constants'
 
-const PAGE_SIZE = 25
-
 export function VehiclesPage() {
   const [params] = useSearchParams()
   return <VehicleCatalog key={params.toString()} brandId={params.get('brand')} modelId={params.get('model')} />
@@ -32,7 +31,7 @@ function VehicleCatalog({ brandId, modelId }: { brandId: string | null; modelId:
     && (modelId === null || (brandId !== null && z.uuid().safeParse(modelId).success))
   const canReadModels = requirePrivilege(`${ENTITIES.CAR_MODEL}:${ACTIONS.READ}`)
   const canReadGenerations = requirePrivilege(`${ENTITIES.CAR_GENERATION}:${ACTIONS.READ}`)
-  const listParams = { page, pageSize: PAGE_SIZE, search: search || undefined }
+  const listParams = { page, pageSize: DEFAULT_PAGE_SIZE, search: search || undefined }
 
   const brand = useQuery({
     queryKey: ['vehicles', 'brand', brandId],
@@ -89,7 +88,7 @@ function VehicleCatalog({ brandId, modelId }: { brandId: string | null; modelId:
       ? (models.data?.items ?? []).map((item) => ({ type: 'model', item }))
       : (generations.data?.items ?? []).map((item) => ({ type: 'generation', item }))
   const total = currentQuery.data?.total
-  const totalPages = Math.max(1, Math.ceil((total ?? 0) / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil((total ?? 0) / DEFAULT_PAGE_SIZE))
 
   useEffect(() => {
     if (total !== undefined && page > totalPages) setPage(totalPages)
@@ -183,7 +182,7 @@ function VehicleCatalog({ brandId, modelId }: { brandId: string | null; modelId:
         <VehicleList
           records={records}
           page={page}
-          pageSize={PAGE_SIZE}
+          pageSize={DEFAULT_PAGE_SIZE}
           total={total}
           search={search}
           isGeneration={level === 'generation'}

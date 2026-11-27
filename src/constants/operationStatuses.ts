@@ -1,4 +1,10 @@
-export type OperationStatus = 'SUCCESS' | 'FAILED' | 'PENDING'
+export const OPERATION_STATUSES = {
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  PENDING: 'PENDING',
+} as const
+
+export type OperationStatus = (typeof OPERATION_STATUSES)[keyof typeof OPERATION_STATUSES]
 
 export const OPERATION_STATUS_LABELS: Record<OperationStatus, string> = {
   SUCCESS: 'Sukces',

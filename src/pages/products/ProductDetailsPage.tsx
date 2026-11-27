@@ -14,7 +14,7 @@ import { ENTITIES } from '@/shared/constants/entities'
 import { escapeHtml } from '@/pages/product-listing-templates/listingTemplate.utils'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
-import { SIDE_LABELS } from './product.constants'
+import { PRODUCT_SIDE_LABELS } from '@/shared/constants/productSides'
 import { formatFitment, formatPrice } from './product.utils'
 
 export function ProductDetailsPage() {
@@ -125,7 +125,7 @@ export function ProductDetailsPage() {
           <CardContent>
             <dl className="space-y-4 text-sm">
               {[
-                ['SKU', product.sku], ['EAN', product.ean], ['OEM', product.oem.join(', ') || null], ['Strona', product.side === null ? null : SIDE_LABELS[product.side]], ['Producent', product.producer?.name ?? 'Nie podano'], ['Dział', product.department?.name ?? 'Nie podano'], ['Magazyn', product.warehouse?.name], ['Lokalizacja', product.warehouseLocation], ['Waga', product.weight === null ? null : `${product.weight} kg`], ['Długość × szerokość × wysokość', [product.length, product.width, product.height].map((value) => value === null ? 'Nie podano' : `${value} cm`).join(' × ')], ['Szablon', product.listingTemplate?.name ?? 'Nie podano'], ['Dodano', new Date(product.createdAt).toLocaleString('pl-PL')], ['Zaktualizowano', new Date(product.updatedAt).toLocaleString('pl-PL')],
+                ['SKU', product.sku], ['EAN', product.ean], ['OEM', product.oem.join(', ') || null], ['Strona', product.side === null ? null : PRODUCT_SIDE_LABELS[product.side]], ['Producent', product.producer?.name ?? 'Nie podano'], ['Dział', product.department?.name ?? 'Nie podano'], ['Magazyn', product.warehouse?.name], ['Lokalizacja', product.warehouseLocation], ['Waga', product.weight === null ? null : `${product.weight} kg`], ['Długość × szerokość × wysokość', [product.length, product.width, product.height].map((value) => value === null ? 'Nie podano' : `${value} cm`).join(' × ')], ['Szablon', product.listingTemplate?.name ?? 'Nie podano'], ['Dodano', new Date(product.createdAt).toLocaleString('pl-PL')], ['Zaktualizowano', new Date(product.updatedAt).toLocaleString('pl-PL')],
               ].map(([label, value]) => <div key={label}>
                 <dt className="text-xs text-muted-foreground">
                   {label}
