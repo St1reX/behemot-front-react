@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ACTIONS, getActionLabel } from '@/shared/constants/actions'
-import { getEntityLabel } from '@/shared/constants/entities'
+import { ACTIONS, getActionLabel } from '@/constants/actions'
+import { getEntityLabel } from '@/constants/entities'
 import type { RolePrivilege } from '@/types/roles/role.types'
 
 export function RolePrivilegesMatrix({ privileges, value, onChange, disabled }: {

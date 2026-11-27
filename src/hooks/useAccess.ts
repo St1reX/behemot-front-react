@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/auth.store'
-import type { Privilege } from '@/shared/constants/privileges'
+import type { Privilege } from '@/constants/privileges'
 
 export function useAccess() {
   const user = useAuthStore((state) => state.user)

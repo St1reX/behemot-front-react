@@ -18,9 +18,17 @@ export const apiHttp = axios.create({
 
 apiHttp.interceptors.response.use(
   (response) => response,
-  (error: unknown) => {
+  async (error: unknown) => {
     // Aborted React Query requests should not produce errors or notifications.
     if (axios.isCancel(error)) return Promise.reject(error)
+
+    // Download endpoints return XLSX on success and the usual JSON error body on failure.
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob
+      && error.response.data.type.includes('application/json')) {
+      try {
+        error.response.data = JSON.parse(await error.response.data.text())
+      } catch { /* Keep the original response for the standard error normalizer. */ }
+    }
 
     const apiError = normalizeApiError(error)
     const config = axios.isAxiosError(error) ? error.config : undefined

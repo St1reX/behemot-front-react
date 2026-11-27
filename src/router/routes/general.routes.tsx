@@ -1,7 +1,7 @@
 import type { RouteObject } from 'react-router'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { ACTIONS } from '@/shared/constants/actions'
-import { ENTITIES } from '@/shared/constants/entities'
+import { ACTIONS } from '@/constants/actions'
+import { ENTITIES } from '@/constants/entities'
 import { RequireAuth, RequirePrivilege } from '../guards'
 
 export const generalRoutes: RouteObject[] = [
@@ -28,7 +28,15 @@ export const generalRoutes: RouteObject[] = [
           },
           {
             element: <RequirePrivilege requiredPrivileges={`${ENTITIES.INTEGRATION}:${ACTIONS.READ}`} />,
-            children: [{ path: '/integrations', lazy: async () => ({ Component: (await import('@/pages/integrations/IntegrationsPage')).IntegrationsPage }) }],
+            children: [
+              {
+                path: '/integrations',
+                children: [
+                  { path: 'marketplace', lazy: async () => ({ Component: (await import('@/pages/integrations/marketplace/MarketplaceIntegrationsPage')).MarketplaceIntegrationsPage }) },
+                  { path: 'imports', lazy: async () => ({ Component: (await import('@/pages/integrations/imports/ImportsPage')).ImportsPage }) },
+                ],
+              },
+            ],
           },
           { path: '/', lazy: async () => ({ Component: (await import('@/pages/home/HomePage')).HomePage }) },
           {

@@ -1,4 +1,4 @@
-import type { IntegrationEnvironment, MarketplaceIntegrationChannel, MarketplaceIntegrationStatus } from '@/shared/constants/marketplaceIntegrations'
+import type { IntegrationEnvironment, MarketplaceIntegrationChannel, MarketplaceIntegrationStatus } from '@/constants/marketplaceIntegrations'
 
 export interface MarketplaceIntegration {
   id: string

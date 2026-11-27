@@ -1,4 +1,4 @@
-import { OPERATION_STATUS_CLASSES, OPERATION_STATUS_LABELS } from '@/shared/constants/operationStatuses'
+import { OPERATION_STATUS_CLASSES, OPERATION_STATUS_LABELS } from '@/constants/operationStatuses'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowRight, History, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { Link } from 'react-router'
@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ListSkeleton } from '@/components/common/ListSkeleton'
 import { useAccess } from '@/hooks/useAccess'
 import { formatAuditDate } from '@/pages/audit-logs/auditLog.utils'
-import { ACTIONS, getActionLabel } from '@/shared/constants/actions'
-import { ENTITIES, getEntityLabel } from '@/shared/constants/entities'
+import { ACTIONS, getActionLabel } from '@/constants/actions'
+import { ENTITIES, getEntityLabel } from '@/constants/entities'
 
 const RECENT_ACTIVITY_LIMIT = 5
 const activityIcons = { CREATE: Plus, UPDATE: Pencil, DELETE: Trash2, READ: History }

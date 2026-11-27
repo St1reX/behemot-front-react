@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Database, FolderOpen, Plus, Trash2 } from 'lucide-react'
+import { ChevronRight, FolderOpen, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { bolmaApiClient } from '@/api/bolma/BolmaApiClient'
 import { marketplaceIntegrationApiClient } from '@/api/marketplaceIntegrations/MarketplaceIntegrationApiClient'
 import erliLogo from '@/assets/images/erli-logo.png'
 import prestashopLogo from '@/assets/images/presta-logo.png'
@@ -18,12 +17,11 @@ import {
   MARKETPLACE_INTEGRATION_CHANNEL_LABELS,
   MARKETPLACE_INTEGRATION_STATUS_CLASSES,
   MARKETPLACE_INTEGRATION_STATUS_LABELS,
-} from '@/shared/constants/marketplaceIntegrations'
-import { ACTIONS } from '@/shared/constants/actions'
-import { ENTITIES } from '@/shared/constants/entities'
+} from '@/constants/marketplaceIntegrations'
+import { ACTIONS } from '@/constants/actions'
+import { ENTITIES } from '@/constants/entities'
 import type { MarketplaceIntegration } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
-import { IntegrationDetailsDialog } from './components/IntegrationDetailsDialog'
-import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
+import { MarketplaceIntegrationDetailsDialog } from './components/MarketplaceIntegrationDetailsDialog'
 import { ErliConfigurationDialog } from './components/erli/ErliConfigurationDialog'
 import { IntegrationDeleteDialog } from './components/IntegrationDeleteDialog'
 import { PrestashopConfigurationDialog } from './components/prestashop/PrestashopConfigurationDialog'
@@ -32,9 +30,9 @@ import { EmagConfigurationDialog } from './components/emag/EmagConfigurationDial
 import { AllegroConfigurationDialog } from './components/allegro/AllegroConfigurationDialog'
 import { AllegroAuthorizationResult } from './components/allegro/AllegroAuthorizationResult'
 
-export function IntegrationsPage() {
+export function MarketplaceIntegrationsPage() {
   const { requirePrivilege } = useAccess()
-  const [selected, setSelected] = useState<SelectedIntegration | null>(null)
+  const [selected, setSelected] = useState<MarketplaceIntegration | null>(null)
   const [erliConfigurationOpen, setErliConfigurationOpen] = useState(false)
   const [prestashopConfigurationOpen, setPrestashopConfigurationOpen] = useState(false)
   const [emagConfigurationOpen, setEmagConfigurationOpen] = useState(false)
@@ -51,63 +49,56 @@ export function IntegrationsPage() {
     retry: false,
   })
 
-  const bolmaQuery = useQuery({
-    queryKey: ['bolma', 'configuration'],
-    queryFn: ({ signal }) => bolmaApiClient.getConfiguration(signal),
-    enabled: requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.READ}`),
-    retry: false,
-  })
-
   return (
     <div className="space-y-6">
-      <PageHeader title="Integracje" description="Źródła danych i konta marketplace połączone z systemem." />
+      <PageHeader title="Marketplace" description="Konta marketplace i sklepy internetowe połączone z systemem." />
       <AllegroAuthorizationResult />
-      <section aria-label="Dostępne integracje" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <section aria-label="Dostępne integracje" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
-          <CardContent className="space-y-4">
-            <div className="flex h-16 items-center gap-4">
+          <CardContent className="flex h-full flex-col gap-4">
+            <div className="flex flex-col items-start gap-3 2xl:flex-row 2xl:items-center">
               <MarketplaceLogo channel="ALLEGRO" className="h-16 w-32 shrink-0 object-contain" />
               <div><h2 className="text-base font-semibold">Allegro</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
             </div>
             <p className="text-sm text-muted-foreground">Połącz konto przez autoryzację na stronie Allegro.</p>
             {canAuthorizeAllegro ? (
-              <Button type="button" variant="outline" className="w-full" onClick={() => setAllegroConfiguration({})}><Plus aria-hidden="true" />Dodaj konto Allegro</Button>
+              <Button type="button" variant="outline" className="mt-auto h-auto min-h-9 w-full whitespace-normal" onClick={() => setAllegroConfiguration({})}><Plus aria-hidden="true" />Dodaj konto Allegro</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
+          <CardContent className="flex h-full flex-col gap-4">
+            <div className="flex flex-col items-start gap-3 2xl:flex-row 2xl:items-center">
               <img src={erliLogo} alt="ERLI" className="h-16 w-32 shrink-0 object-contain" />
               <div><h2 className="text-base font-semibold">ERLI</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
             </div>
             <p className="text-sm text-muted-foreground">Dodaj konto sprzedawcy za pomocą tokenu API.</p>
             {canCreate ? (
-              <Button type="button" variant="outline" className="w-full" onClick={() => setErliConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto ERLI</Button>
+              <Button type="button" variant="outline" className="mt-auto h-auto min-h-9 w-full whitespace-normal" onClick={() => setErliConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto ERLI</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
+          <CardContent className="flex h-full flex-col gap-4">
+            <div className="flex flex-col items-start gap-3 2xl:flex-row 2xl:items-center">
               <img src={prestashopLogo} alt="PrestaShop" className="h-16 w-32 shrink-0 object-contain" />
               <div><h2 className="text-base font-semibold">PrestaShop</h2><p className="text-xs text-muted-foreground">Sklep internetowy</p></div>
             </div>
             <p className="text-sm text-muted-foreground">Połącz własny sklep, podając jego adres i klucz API.</p>
             {canCreate ? (
-              <Button type="button" variant="outline" className="w-full" onClick={() => setPrestashopConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj sklep PrestaShop</Button>
+              <Button type="button" variant="outline" className="mt-auto h-auto min-h-9 w-full whitespace-normal" onClick={() => setPrestashopConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj sklep PrestaShop</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="space-y-4">
-            <div className="flex h-16 items-center gap-4">
+          <CardContent className="flex h-full flex-col gap-4">
+            <div className="flex flex-col items-start gap-3 2xl:flex-row 2xl:items-center">
               <MarketplaceLogo channel="EMAG" className="h-16 w-32 shrink-0 object-contain" />
               <div><h2 className="text-base font-semibold">eMAG</h2><p className="text-xs text-muted-foreground">Marketplace</p></div>
             </div>
             <p className="text-sm text-muted-foreground">Wybierz rynek i podaj adres API, e-mail oraz hasło konta.</p>
             {canCreate ? (
-              <Button type="button" variant="outline" className="w-full" onClick={() => setEmagConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto eMAG</Button>
+              <Button type="button" variant="outline" className="mt-auto h-auto min-h-9 w-full whitespace-normal" onClick={() => setEmagConfigurationOpen(true)}><Plus aria-hidden="true" />Dodaj konto eMAG</Button>
             ) : <p className="text-xs text-muted-foreground">Nie masz uprawnień do dodawania integracji.</p>}
           </CardContent>
         </Card>
@@ -115,31 +106,10 @@ export function IntegrationsPage() {
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
           <ListToolbar
-            isFetching={query.isFetching || bolmaQuery.isFetching}
-            onRefresh={() => { void query.refetch(); void bolmaQuery.refetch() }}
+            isFetching={query.isFetching}
+            onRefresh={() => { void query.refetch() }}
             summary={query.data && <span>Konta marketplace: {query.data.length}</span>}
           />
-          <div className="space-y-6 p-4 sm:p-6">
-            <section aria-label="Podstawowe źródło danych">
-              <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Podstawowe źródło danych</p>
-              {bolmaQuery.error ? (
-                <p role="alert" className="text-sm text-destructive">{bolmaQuery.error.message}</p>
-              ) : bolmaQuery.isPending ? (
-                <ListSkeleton message="Wczytywanie konfiguracji Bolmy…" />
-              ) : bolmaQuery.data && (
-                <Button
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-4 rounded-xl border bg-muted/30 p-4 text-left whitespace-normal"
-                  onClick={() => { if (bolmaQuery.data) setSelected({ kind: 'bolma', integration: bolmaQuery.data }) }}
-                >
-                  <Database aria-hidden="true" className="size-5 shrink-0 text-primary" />
-                  <span className="min-w-0 flex-1"><span className="block font-semibold">{bolmaQuery.data.name}</span><span className="block text-xs font-normal text-muted-foreground">Katalog produktów · MySQL</span></span>
-                  <span className="text-xs text-muted-foreground">{bolmaQuery.data.isConfigured ? 'Skonfigurowana' : 'Brak konfiguracji'}</span>
-                  <ChevronRight aria-hidden="true" className="shrink-0" />
-                </Button>
-              )}
-            </section>
-          </div>
           {query.error ? (
             <p role="alert" className="p-6 text-sm text-destructive">{query.error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.</p>
           ) : query.isPending ? (
@@ -168,7 +138,7 @@ export function IntegrationsPage() {
                               <ul className="mt-1 ml-5 space-y-1 border-l pl-4">
                                 {integrations.map((integration) => (
                                   <li key={integration.id} className="flex items-center gap-1">
-                                    <Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected({ kind: 'marketplace', integration })}>
+                                    <Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start gap-3 py-3 text-left whitespace-normal" onClick={() => setSelected(integration)}>
                                       <MarketplaceLogo channel={integration.channel} className="h-8 w-16 shrink-0 object-contain" />
                                       <span className="min-w-0 flex-1 wrap-anywhere"><span className="block">{integration.name}</span><span className="block text-xs font-normal text-muted-foreground">{integration.externalUsername ?? integration.externalAccountId ?? 'Brak danych konta'}{integration.environment === INTEGRATION_ENVIRONMENTS.SANDBOX && ' · Sandbox'}</span></span>
                                       <span className={`shrink-0 rounded-md px-2 py-1 text-xs ${integration.isEnabled ? MARKETPLACE_INTEGRATION_STATUS_CLASSES[integration.status] : 'bg-muted text-muted-foreground'}`}>{integration.isEnabled ? MARKETPLACE_INTEGRATION_STATUS_LABELS[integration.status] : 'Wyłączona'}</span>
@@ -194,7 +164,7 @@ export function IntegrationsPage() {
           )}
         </CardContent>
       </Card>
-      {selected && <IntegrationDetailsDialog selected={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected({ kind: 'marketplace', integration })}
+      {selected && <MarketplaceIntegrationDetailsDialog integration={selected} onClose={() => setSelected(null)} onUpdated={(integration) => setSelected(integration)}
         onReconnect={(integration) => { setSelected(null); setAllegroConfiguration({ integration }) }} />}
       {allegroConfiguration && canAuthorizeAllegro && <AllegroConfigurationDialog integration={allegroConfiguration.integration} onClose={() => setAllegroConfiguration(null)} />}
       {erliConfigurationOpen && canCreate && <ErliConfigurationDialog onClose={() => setErliConfigurationOpen(false)} />}

@@ -1,5 +1,5 @@
-import { ENTITIES } from '@/shared/constants/entities'
-import type { Entity } from '@/shared/constants/entities'
+import { ENTITIES } from '@/constants/entities'
+import type { Entity } from '@/constants/entities'
 import type { VehicleRecord } from '@/types/vehicles/vehicle.types'
 
 export const VEHICLE_ENTITIES = {

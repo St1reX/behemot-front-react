@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import type { AuditLogFilters as Filters } from '@/types/audit-logs/auditLog.types'
-import { ACTION_LABELS } from '@/shared/constants/actions'
-import { ENTITY_LABELS } from '@/shared/constants/entities'
-import { OPERATION_STATUS_LABELS } from '@/shared/constants/operationStatuses'
+import { ACTION_LABELS } from '@/constants/actions'
+import { ENTITY_LABELS } from '@/constants/entities'
+import { OPERATION_STATUS_LABELS } from '@/constants/operationStatuses'
 
 const emptyFilters = { search: '', entityName: '', action: '', operationStatus: '', from: '', to: '' }
 

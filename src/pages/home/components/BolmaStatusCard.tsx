@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { CheckCircle2, CircleAlert, CircleHelp, Database, RefreshCw } from 'lucide-react'
-import { bolmaApiClient } from '@/api/bolma/BolmaApiClient'
+import { importsApiClient } from '@/api/imports/ImportsApiClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 export function BolmaStatusCard() {
   const statusQuery = useQuery({
     queryKey: ['bolma', 'status'],
-    queryFn: ({ signal }) => bolmaApiClient.getStatus(signal),
+    queryFn: ({ signal }) => importsApiClient.getBolmaStatus(signal),
     staleTime: 15_000,
     refetchInterval: 30_000,
     retry: false,

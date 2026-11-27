@@ -1,19 +1,29 @@
-import { CarFront, Factory, FileText, Handshake, History, LayoutDashboard, Network, Package, Plug, ShieldCheck, Users, Warehouse } from 'lucide-react'
+import { CarFront, ChevronRight, Factory, FileText, Handshake, History, LayoutDashboard, Network, Package, Plug, ShieldCheck, Users, Warehouse } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation } from 'react-router'
 import behemotLogo from '@/assets/images/behemot-logo.jpeg'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
   SidebarRail, SidebarSeparator, useSidebar,
 } from '@/components/ui/sidebar'
 import { useAccess } from '@/hooks/useAccess'
-import { ACTIONS } from '@/shared/constants/actions'
-import { ENTITIES } from '@/shared/constants/entities'
-import type { Privilege } from '@/shared/constants/privileges'
+import { ACTIONS } from '@/constants/actions'
+import { ENTITIES } from '@/constants/entities'
+import type { Privilege } from '@/constants/privileges'
 import { SidebarUserMenu } from './SidebarUserMenu'
 
-const navigationGroups: { label: string; items: { title: string; to: string; icon: LucideIcon; privilege?: Privilege }[] }[] = [
+type NavigationItem = {
+  title: string
+  to: string
+  icon: LucideIcon
+  privilege?: Privilege
+  children?: { title: string; to: string }[]
+}
+
+const navigationGroups: { label: string; items: NavigationItem[] }[] = [
   {
     label: 'Przegląd',
     items: [
@@ -34,7 +44,13 @@ const navigationGroups: { label: string; items: { title: string; to: string; ico
   {
     label: 'Administracja',
     items: [
-      { title: 'Integracje', to: '/integrations', icon: Plug, privilege: `${ENTITIES.INTEGRATION}:${ACTIONS.READ}` },
+      {
+        title: 'Integracje', to: '/integrations/marketplace', icon: Plug, privilege: `${ENTITIES.INTEGRATION}:${ACTIONS.READ}`,
+        children: [
+          { title: 'Marketplace', to: '/integrations/marketplace' },
+          { title: 'Importy', to: '/integrations/imports' },
+        ],
+      },
       { title: 'Szablony ogłoszeń', to: '/listing-templates', icon: FileText, privilege: `${ENTITIES.PRODUCT_LISTING_TEMPLATE}:${ACTIONS.READ}` },
       { title: 'Działy', to: '/departments', icon: Network, privilege: `${ENTITIES.DEPARTMENT}:${ACTIONS.READ}` },
       { title: 'Role i uprawnienia', to: '/roles', icon: ShieldCheck, privilege: `${ENTITIES.ROLE}:${ACTIONS.READ}` },
@@ -70,18 +86,49 @@ export function AppSidebar() {
               <SidebarGroupLabel className="text-[10px] font-semibold tracking-wider uppercase">{group.label}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-1">
-                  {items.map((item) => (
-                    <SidebarMenuItem key={item.to}>
-                      <SidebarMenuButton
-                        render={<NavLink to={item.to} end={item.to === '/'} onClick={() => setOpenMobile(false)} />}
-                        isActive={pathname === item.to || (item.to !== '/' && pathname.startsWith(`${item.to}/`))}
-                        tooltip={item.title}
-                        aria-label={item.title}
-                      >
-                        <item.icon aria-hidden="true" /><span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {items.map((item) => {
+                    const isActive = pathname === item.to
+                      || (item.to !== '/' && pathname.startsWith(`${item.to}/`))
+                      || Boolean(item.children?.some((child) => pathname === child.to || pathname.startsWith(`${child.to}/`)))
+
+                    if (item.children) {
+                      return (
+                        <Collapsible key={item.to} defaultOpen={isActive} render={<SidebarMenuItem />} className="group/navigation">
+                          <SidebarMenuButton render={<CollapsibleTrigger />} isActive={isActive} tooltip={item.title} aria-label={item.title}>
+                            <item.icon aria-hidden="true" /><span>{item.title}</span>
+                            <ChevronRight aria-hidden="true" className="ml-auto transition-transform group-data-open/navigation:rotate-90 group-data-[collapsible=icon]:hidden" />
+                          </SidebarMenuButton>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.children.map((child) => (
+                                <SidebarMenuSubItem key={child.to}>
+                                  <SidebarMenuSubButton
+                                    render={<NavLink to={child.to} onClick={() => setOpenMobile(false)} />}
+                                    isActive={pathname === child.to || pathname.startsWith(`${child.to}/`)}
+                                  >
+                                    <span>{child.title}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )
+                    }
+
+                    return (
+                      <SidebarMenuItem key={item.to}>
+                        <SidebarMenuButton
+                          render={<NavLink to={item.to} end={item.to === '/'} onClick={() => setOpenMobile(false)} />}
+                          isActive={isActive}
+                          tooltip={item.title}
+                          aria-label={item.title}
+                        >
+                          <item.icon aria-hidden="true" /><span>{item.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

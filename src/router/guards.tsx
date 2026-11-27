@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useAccess } from '@/hooks/useAccess'
-import type { Privilege } from '@/shared/constants/privileges'
+import type { Privilege } from '@/constants/privileges'
 
 export function RequireAuth() {
   const user = useAuthStore((state) => state.user)

@@ -1,6 +1,6 @@
-import type { Action } from '@/shared/constants/actions'
-import type { Entity } from '@/shared/constants/entities'
-import type { OperationStatus } from '@/shared/constants/operationStatuses'
+import type { Action } from '@/constants/actions'
+import type { Entity } from '@/constants/entities'
+import type { OperationStatus } from '@/constants/operationStatuses'
 
 export interface AuditLog {
   id: string

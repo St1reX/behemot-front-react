@@ -1,6 +1,6 @@
-import type { MarketplaceIntegrationChannel } from '@/shared/constants/marketplaceIntegrations'
-import type { IntegrationSyncStatus } from '@/shared/constants/integrationSyncStatuses'
-import type { ProductSide } from '@/shared/constants/productSides'
+import type { MarketplaceIntegrationChannel } from '@/constants/marketplaceIntegrations'
+import type { IntegrationSyncStatus } from '@/constants/integrationSyncStatuses'
+import type { ProductSide } from '@/constants/productSides'
 import type { CarGeneration, CarModel } from '@/types/vehicles/vehicle.types'
 
 export interface ProductFitment {

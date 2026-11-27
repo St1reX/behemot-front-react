@@ -1,8 +1,8 @@
 import { CircleCheck, CircleDashed, Clock3, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { INTEGRATION_SYNC_STATUSES } from '@/shared/constants/integrationSyncStatuses'
+import { INTEGRATION_SYNC_STATUSES } from '@/constants/integrationSyncStatuses'
 import type { ProductExternalListing } from '@/types/products/product.types'
-import { MARKETPLACE_INTEGRATION_CHANNELS, MARKETPLACE_INTEGRATION_CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
+import { MARKETPLACE_INTEGRATION_CHANNELS, MARKETPLACE_INTEGRATION_CHANNEL_LABELS } from '@/constants/marketplaceIntegrations'
 
 export function ProductIntegrations({ listings, contentVersion, isLegacy, compact = false }: { listings: ProductExternalListing[]; contentVersion: number; isLegacy: boolean; compact?: boolean }) {
   return <div className={cn('grid gap-3 sm:grid-cols-2 xl:grid-cols-4', compact && 'flex flex-wrap gap-1.5')}>
