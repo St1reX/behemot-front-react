@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { emagApiClient } from '@/api/integrations/emag/EmagApiClient'
+import { emagApiClient } from '@/api/marketplaceIntegrations/emag/EmagApiClient'
 import { FormActions } from '@/components/common/FormActions'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/lib/toast'
-import { emagConfigurationSchema, emagMarketSchema } from '@/types/integrations/emag/emag.schema'
-import type { EmagConfigurationInput } from '@/types/integrations/emag/emag.schema'
+import { emagConfigurationSchema, emagMarketSchema } from '@/types/marketplaceIntegrations/emag/emag.schema'
+import type { EmagConfigurationInput } from '@/types/marketplaceIntegrations/emag/emag.schema'
 import { MarketplaceLogo } from '../MarketplaceLogo'
 import { EmagMarketLabel } from './EmagMarketLabel'
 
@@ -25,7 +25,7 @@ export function EmagConfigurationDialog({ onClose }: { onClose: () => void }) {
     retry: false,
     onSuccess: async () => {
       reset()
-      await queryClient.invalidateQueries({ queryKey: ['integrations'] })
+      await queryClient.invalidateQueries({ queryKey: ['marketplaceIntegrations'] })
       toast.add({ type: 'success', title: 'Konto eMAG zostało połączone.' })
       onClose()
     },

@@ -1,4 +1,4 @@
-import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import type { CarGeneration, CarModel } from '@/types/vehicles/vehicle.types'
 
 export type ProductSide = 'LEFT' | 'RIGHT' | 'BOTH' | 'NONE'

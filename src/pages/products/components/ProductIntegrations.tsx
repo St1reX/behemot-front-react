@@ -1,7 +1,7 @@
 import { CircleCheck, CircleDashed, Clock3, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ProductExternalListing } from '@/types/products/product.types'
-import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 
 export function ProductIntegrations({ listings, contentVersion, isLegacy, compact = false }: { listings: ProductExternalListing[]; contentVersion: number; isLegacy: boolean; compact?: boolean }) {

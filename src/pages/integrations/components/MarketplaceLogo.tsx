@@ -2,7 +2,7 @@ import erliLogo from '@/assets/images/erli-logo.png'
 import emagLogo from '@/assets/images/emag-logo.png'
 import prestashopLogo from '@/assets/images/presta-logo.png'
 import allegroLogo from '@/assets/images/allegro-logo.png'
-import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { Store } from 'lucide-react'
 
 export function MarketplaceLogo({ channel, className }: { channel: MarketplaceIntegrationChannel; className?: string }) {

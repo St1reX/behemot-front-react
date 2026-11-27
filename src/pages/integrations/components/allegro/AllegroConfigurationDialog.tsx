@@ -1,18 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { allegroApiClient } from '@/api/integrations/allegro/AllegroApiClient'
+import { allegroApiClient } from '@/api/marketplaceIntegrations/allegro/AllegroApiClient'
 import { FormActions } from '@/components/common/FormActions'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { allegroAuthorizationSchema } from '@/types/integrations/allegro/allegro.schema'
-import type { AllegroAuthorizationInput } from '@/types/integrations/allegro/allegro.schema'
-import type { MarketplaceIntegration } from '@/types/integrations/integration.types'
+import { allegroAuthorizationSchema } from '@/types/marketplaceIntegrations/allegro/allegro.schema'
+import type { AllegroAuthorizationInput } from '@/types/marketplaceIntegrations/allegro/allegro.schema'
+import type { MarketplaceIntegration } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { MarketplaceLogo } from '../MarketplaceLogo'
 
 export function AllegroConfigurationDialog({ integration, onClose }: { integration?: MarketplaceIntegration; onClose: () => void }) {
   const configuration = useQuery({
-    queryKey: ['integrations', 'allegro', 'configuration'],
+    queryKey: ['marketplaceIntegrations', 'allegro', 'configuration'],
     queryFn: ({ signal }) => allegroApiClient.getConfiguration(signal),
     retry: false,
   })

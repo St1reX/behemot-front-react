@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Database, RefreshCw } from 'lucide-react'
-import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
+import { marketplaceIntegrationApiClient } from '@/api/marketplaceIntegrations/MarketplaceIntegrationApiClient'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useAccess } from '@/hooks/useAccess'
@@ -9,7 +9,8 @@ import { toast } from '@/lib/toast'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
-import type { BolmaIntegration, IntegrationsResponse, MarketplaceIntegration } from '@/types/integrations/integration.types'
+import type { BolmaIntegration } from '@/types/bolma/bolma.types'
+import type { MarketplaceIntegration } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { STATUS_LABELS } from '../integration.constants'
 import { MarketplaceLogo } from './MarketplaceLogo'
 import { EmagMarketLabel } from './emag/EmagMarketLabel'
@@ -42,13 +43,12 @@ export function IntegrationDetailsDialog({ selected, onClose, onUpdated, onRecon
   const { requirePrivilege } = useAccess()
   const canCheck = Boolean(marketplace) && requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
   const mutation = useMutation({
-    mutationFn: (id: string) => integrationApiClient.checkConnection(id),
+    mutationFn: (id: string) => marketplaceIntegrationApiClient.checkConnection(id),
     retry: false,
     onSuccess: ({ integration, error }) => {
-      queryClient.setQueryData<IntegrationsResponse>(['integrations'], (previous) => previous ? {
-        ...previous,
-        marketplaces: previous.marketplaces.map((item) => item.id === integration.id ? integration : item),
-      } : previous)
+      queryClient.setQueryData<MarketplaceIntegration[]>(['marketplaceIntegrations'], (previous) =>
+        previous?.map((item) => item.id === integration.id ? integration : item),
+      )
       onUpdated(integration)
       toast.add({ type: error ? 'error' : 'success', title: error ? 'Nie udało się połączyć z integracją.' : 'Połączenie działa. Dane konta zostały odświeżone.' })
     },

@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAccess } from '@/hooks/useAccess'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import type { MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { ProductImage } from './components/ProductImage'
 import { ProductIntegrations } from './components/ProductIntegrations'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'

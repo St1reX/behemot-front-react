@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Database, FolderOpen, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
+import { bolmaApiClient } from '@/api/bolma/BolmaApiClient'
+import { marketplaceIntegrationApiClient } from '@/api/marketplaceIntegrations/MarketplaceIntegrationApiClient'
 import erliLogo from '@/assets/images/erli-logo.png'
 import prestashopLogo from '@/assets/images/presta-logo.png'
 import { ListSkeleton } from '@/components/common/ListSkeleton'
@@ -14,7 +15,7 @@ import { useAccess } from '@/hooks/useAccess'
 import { CHANNEL_LABELS } from '@/shared/constants/marketplaceIntegrations'
 import { ACTIONS } from '@/shared/constants/actions'
 import { ENTITIES } from '@/shared/constants/entities'
-import type { MarketplaceIntegration, MarketplaceIntegrationChannel } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegration, MarketplaceIntegrationChannel } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 import { IntegrationDetailsDialog } from './components/IntegrationDetailsDialog'
 import type { SelectedIntegration } from './components/IntegrationDetailsDialog'
 import { STATUS_CLASSES, STATUS_LABELS } from './integration.constants'
@@ -39,8 +40,15 @@ export function IntegrationsPage() {
   const canUpdate = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
   const canAuthorizeAllegro = canCreate && canUpdate
   const query = useQuery({
-    queryKey: ['integrations'],
-    queryFn: ({ signal }) => integrationApiClient.list(signal),
+    queryKey: ['marketplaceIntegrations'],
+    queryFn: ({ signal }) => marketplaceIntegrationApiClient.list(signal),
+    enabled: requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.READ}`),
+    retry: false,
+  })
+
+  const bolmaQuery = useQuery({
+    queryKey: ['bolma', 'configuration'],
+    queryFn: ({ signal }) => bolmaApiClient.getConfiguration(signal),
     enabled: requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.READ}`),
     retry: false,
   })
@@ -102,37 +110,45 @@ export function IntegrationsPage() {
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
           <ListToolbar
-            isFetching={query.isFetching}
-            onRefresh={() => { void query.refetch() }}
-            summary={query.data && <span>Konta marketplace: {query.data.marketplaces.length}</span>}
+            isFetching={query.isFetching || bolmaQuery.isFetching}
+            onRefresh={() => { void query.refetch(); void bolmaQuery.refetch() }}
+            summary={query.data && <span>Konta marketplace: {query.data.length}</span>}
           />
+          <div className="space-y-6 p-4 sm:p-6">
+            <section aria-label="Podstawowe źródło danych">
+              <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Podstawowe źródło danych</p>
+              {bolmaQuery.error ? (
+                <p role="alert" className="text-sm text-destructive">{bolmaQuery.error.message}</p>
+              ) : bolmaQuery.isPending ? (
+                <ListSkeleton message="Wczytywanie konfiguracji Bolmy…" />
+              ) : bolmaQuery.data && (
+                <Button
+                  variant="ghost"
+                  className="h-auto w-full justify-start gap-4 rounded-xl border bg-muted/30 p-4 text-left whitespace-normal"
+                  onClick={() => { if (bolmaQuery.data) setSelected({ kind: 'bolma', integration: bolmaQuery.data }) }}
+                >
+                  <Database aria-hidden="true" className="size-5 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1"><span className="block font-semibold">{bolmaQuery.data.name}</span><span className="block text-xs font-normal text-muted-foreground">Katalog produktów · MySQL</span></span>
+                  <span className="text-xs text-muted-foreground">{bolmaQuery.data.isConfigured ? 'Skonfigurowana' : 'Brak konfiguracji'}</span>
+                  <ChevronRight aria-hidden="true" className="shrink-0" />
+                </Button>
+              )}
+            </section>
+          </div>
           {query.error ? (
             <p role="alert" className="p-6 text-sm text-destructive">{query.error.message} Użyj przycisku „Odśwież”, aby ponowić odczyt.</p>
           ) : query.isPending ? (
             <ListSkeleton message="Wczytywanie integracji…" />
           ) : query.data && (
             <div className="space-y-6 p-4 sm:p-6">
-              <section aria-label="Podstawowe źródło danych">
-                <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Podstawowe źródło danych</p>
-                <Button
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-4 rounded-xl border bg-muted/30 p-4 text-left whitespace-normal"
-                  onClick={() => { if (query.data) setSelected({ kind: 'bolma', integration: query.data.bolma }) }}
-                >
-                  <Database aria-hidden="true" className="size-5 shrink-0 text-primary" />
-                  <span className="min-w-0 flex-1"><span className="block font-semibold">{query.data.bolma.name}</span><span className="block text-xs font-normal text-muted-foreground">Katalog produktów · MySQL</span></span>
-                  <span className="text-xs text-muted-foreground">{query.data.bolma.isConfigured ? 'Skonfigurowana' : 'Brak konfiguracji'}</span>
-                  <ChevronRight aria-hidden="true" className="shrink-0" />
-                </Button>
-              </section>
               <section aria-label="Integracje marketplace">
                 <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Marketplace</p>
-                {query.data.marketplaces.length === 0 ? (
+                {query.data.length === 0 ? (
                   <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Nie dodano jeszcze żadnych integracji marketplace.</p>
                 ) : (
                   <ul className="space-y-2">
                     {(Object.keys(CHANNEL_LABELS) as MarketplaceIntegrationChannel[]).map((channel) => {
-                      const integrations = query.data.marketplaces.filter((integration) => integration.channel === channel)
+                      const integrations = query.data.filter((integration) => integration.channel === channel)
                       if (!integrations.length) return null
                       return (
                         <li key={channel}>

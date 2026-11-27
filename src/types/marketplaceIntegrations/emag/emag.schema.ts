@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { apiBaseUrlSchema } from '../schemas/apiBaseUrl.schema';
+import { apiBaseUrlSchema } from '../schemas/apiBaseUrl.schema.ts';
 
 export const emagMarketSchema = z.enum(['RO', 'BG', 'HU']);
 export type EmagMarket = z.infer<typeof emagMarketSchema>;

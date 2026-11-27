@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { integrationApiClient } from '@/api/integrations/IntegrationApiClient'
+import { marketplaceIntegrationApiClient } from '@/api/marketplaceIntegrations/MarketplaceIntegrationApiClient'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { toast } from '@/lib/toast'
-import type { MarketplaceIntegration } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegration } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 
 export function IntegrationDeleteDialog({ integration, onClose }: { integration: MarketplaceIntegration; onClose: () => void }) {
   const queryClient = useQueryClient()
   const mutation = useMutation({
-    mutationFn: () => integrationApiClient.remove(integration.id),
+    mutationFn: () => marketplaceIntegrationApiClient.remove(integration.id),
     retry: false,
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['integrations'] }),
+        queryClient.invalidateQueries({ queryKey: ['marketplaceIntegrations'] }),
         queryClient.invalidateQueries({ queryKey: ['products'] }),
       ])
       toast.add({ type: 'success', title: 'Integracja i powiązane oferty zostały usunięte.' })

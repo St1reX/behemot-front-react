@@ -1,4 +1,4 @@
-import type { MarketplaceIntegrationStatus } from '@/types/integrations/integration.types'
+import type { MarketplaceIntegrationStatus } from '@/types/marketplaceIntegrations/marketplaceIntegration.types'
 
 export const STATUS_LABELS: Record<MarketplaceIntegrationStatus, string> = {
   PENDING: 'Oczekuje na połączenie',

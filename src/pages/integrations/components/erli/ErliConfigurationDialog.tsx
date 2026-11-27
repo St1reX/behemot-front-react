@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { erliApiClient } from '@/api/integrations/erli/ErliApiClient'
+import { erliApiClient } from '@/api/marketplaceIntegrations/erli/ErliApiClient'
 import erliLogo from '@/assets/images/erli-logo.png'
 import { FormActions } from '@/components/common/FormActions'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/lib/toast'
-import { erliConfigurationSchema } from '@/types/integrations/erli/erli.schema'
-import type { ErliConfigurationInput } from '@/types/integrations/erli/erli.schema'
+import { erliConfigurationSchema } from '@/types/marketplaceIntegrations/erli/erli.schema'
+import type { ErliConfigurationInput } from '@/types/marketplaceIntegrations/erli/erli.schema'
 
 export function ErliConfigurationDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
@@ -22,7 +22,7 @@ export function ErliConfigurationDialog({ onClose }: { onClose: () => void }) {
     retry: false,
     onSuccess: async () => {
       reset()
-      await queryClient.invalidateQueries({ queryKey: ['integrations'] })
+      await queryClient.invalidateQueries({ queryKey: ['marketplaceIntegrations'] })
       toast.add({ type: 'success', title: 'Konto ERLI zostało połączone.' })
       onClose()
     },

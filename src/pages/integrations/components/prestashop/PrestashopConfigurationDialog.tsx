@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { prestashopApiClient } from '@/api/integrations/prestashop/PrestashopApiClient'
+import { prestashopApiClient } from '@/api/marketplaceIntegrations/prestashop/PrestashopApiClient'
 import prestashopLogo from '@/assets/images/presta-logo.png'
 import { FormActions } from '@/components/common/FormActions'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/lib/toast'
-import { prestashopConfigurationSchema } from '@/types/integrations/prestashop/prestashop.schema'
-import type { PrestashopConfigurationInput } from '@/types/integrations/prestashop/prestashop.schema'
+import { prestashopConfigurationSchema } from '@/types/marketplaceIntegrations/prestashop/prestashop.schema'
+import type { PrestashopConfigurationInput } from '@/types/marketplaceIntegrations/prestashop/prestashop.schema'
 
 export function PrestashopConfigurationDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
@@ -22,7 +22,7 @@ export function PrestashopConfigurationDialog({ onClose }: { onClose: () => void
     retry: false,
     onSuccess: async () => {
       reset()
-      await queryClient.invalidateQueries({ queryKey: ['integrations'] })
+      await queryClient.invalidateQueries({ queryKey: ['marketplaceIntegrations'] })
       toast.add({ type: 'success', title: 'Sklep PrestaShop został połączony.' })
       onClose()
     },
