@@ -1,18 +1,6 @@
 import { apiHttp } from '@/api/http'
+import { toDownloadedFile, type DownloadedFile } from '@/api/files/download'
 import type { BolmaIntegration, BolmaStatusResponse } from '@/types/imports/imports.types'
-
-function saveReport(blob: Blob, importId: string, disposition: unknown) {
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  const serverFilename = typeof disposition === 'string' ? /filename="([^"]+)"/.exec(disposition)?.[1] : undefined
-  const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' }).format(new Date())
-  link.download = serverFilename ?? `raport_import_bolma_${date}_${importId.slice(0, 8)}.xlsx`
-  document.body.append(link)
-  link.click()
-  link.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
-}
 
 export const importsApiClient = {
   async getBolmaStatus(signal?: AbortSignal): Promise<BolmaStatusResponse> {
@@ -27,17 +15,17 @@ export const importsApiClient = {
     return data
   },
 
-  async importBolmaProducts(importId: string): Promise<void> {
-    const { data, headers } = await apiHttp.post<Blob>('/imports/bolma/products', { importId, confirmed: true }, {
+  async importBolmaProducts(): Promise<DownloadedFile> {
+    const response = await apiHttp.post<Blob>('/imports/bolma/products', { confirmed: true }, {
       responseType: 'blob', timeout: 0, showErrorToast: false,
     })
-    saveReport(data, importId, headers['content-disposition'])
+    return toDownloadedFile(response, 'raport_import_bolma.xlsx')
   },
 
-  async downloadBolmaReport(importId: string): Promise<void> {
-    const { data, headers } = await apiHttp.get<Blob>(`/imports/bolma/products/${importId}/report`, {
+  async downloadLatestBolmaReport(): Promise<DownloadedFile> {
+    const response = await apiHttp.get<Blob>('/imports/bolma/products/report/latest', {
       responseType: 'blob', showErrorToast: false,
     })
-    saveReport(data, importId, headers['content-disposition'])
+    return toDownloadedFile(response, 'raport_import_bolma.xlsx')
   },
 }

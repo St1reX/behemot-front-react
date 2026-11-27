@@ -3,13 +3,13 @@ import { Database, Download, LoaderCircle, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useBlocker } from 'react-router'
 import { importsApiClient } from '@/api/imports/ImportsApiClient'
+import { saveDownloadedFile } from '@/api/files/download'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ACTIONS } from '@/constants/actions'
 import { ENTITIES } from '@/constants/entities'
 import { useAccess } from '@/hooks/useAccess'
-import { useAuthStore } from '@/stores/auth.store'
 import type { BolmaIntegration } from '@/types/imports/imports.types'
 
 export function BolmaDetailsDialog({ integration, onClose }: {
@@ -18,25 +18,25 @@ export function BolmaDetailsDialog({ integration, onClose }: {
 }) {
   const queryClient = useQueryClient()
   const { requirePrivilege } = useAccess()
-  const userId = useAuthStore((state) => state.user?.id)
-  const storageKey = `bolma-import-report:${userId}`
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [importId, setImportId] = useState<string | null>(() => {
-    try { return localStorage.getItem(storageKey) } catch { return null }
-  })
   const canImport = requirePrivilege(`${ENTITIES.INTEGRATION}:${ACTIONS.UPDATE}`)
     && requirePrivilege(`${ENTITIES.PRODUCT}:${ACTIONS.CREATE}`)
     && requirePrivilege(`${ENTITIES.PRODUCT}:${ACTIONS.UPDATE}`)
   const sync = useMutation({
     mutationFn: importsApiClient.importBolmaProducts,
     retry: false,
+    onSuccess: saveDownloadedFile,
     onSettled: () => {
       setConfirmOpen(false)
       void queryClient.invalidateQueries({ queryKey: ['products'] })
       void queryClient.invalidateQueries({ queryKey: ['audit-logs'] })
     },
   })
-  const download = useMutation({ mutationFn: importsApiClient.downloadBolmaReport, retry: false })
+  const download = useMutation({
+    mutationFn: importsApiClient.downloadLatestBolmaReport,
+    retry: false,
+    onSuccess: saveDownloadedFile,
+  })
   const blocker = useBlocker(sync.isPending)
 
   useEffect(() => {
@@ -83,14 +83,14 @@ export function BolmaDetailsDialog({ integration, onClose }: {
           Trwa synchronizacja produktów. Poczekaj i nie zamykaj strony. Po zakończeniu raport XLSX pobierze się automatycznie.
         </p>}
         {sync.isSuccess && <p role="status" className="rounded-lg bg-muted p-3 text-sm">Przebieg zakończony. Rozpoczęto pobieranie raportu. Sprawdź arkusze INFO, WARNING i ERROR — zakończenie żądania nie oznacza, że wszystkie rekordy zostały zapisane.</p>}
-        {sync.error && <p role="alert" className="text-sm text-destructive">{sync.error.message} Część produktów mogła zostać już zapisana. Spróbuj pobrać raport tego przebiegu przed ponownym uruchomieniem synchronizacji.</p>}
+        {sync.error && <p role="alert" className="text-sm text-destructive">{sync.error.message} Część produktów mogła zostać już zapisana. Sprawdź najnowszy raport importu przed ponownym uruchomieniem synchronizacji.</p>}
         {download.error && <p role="alert" className="text-sm text-destructive">{download.error.message}</p>}
         {!canImport && <p className="text-xs text-muted-foreground">Synchronizacja wymaga uprawnień do aktualizacji integracji oraz tworzenia i aktualizacji produktów.</p>}
         <DialogFooter className="flex-wrap">
           <Button type="button" variant="outline" disabled={sync.isPending} onClick={onClose}>Zamknij</Button>
-          {importId && <Button type="button" variant="outline" disabled={sync.isPending || download.isPending} onClick={() => download.mutate(importId)}>
-            <Download aria-hidden="true" />{download.isPending ? 'Pobieranie…' : 'Pobierz ostatni raport'}
-          </Button>}
+          <Button type="button" variant="outline" disabled={sync.isPending || download.isPending} onClick={() => download.mutate()}>
+            <Download aria-hidden="true" />{download.isPending ? 'Pobieranie…' : 'Pobierz najnowszy raport importu'}
+          </Button>
           {canImport && <Button type="button" disabled={!integration.isConfigured || sync.isPending || download.isPending} onClick={() => setConfirmOpen(true)}>
             <RefreshCw aria-hidden="true" />Przeprowadź synchronizację produktów
           </Button>}
@@ -111,11 +111,8 @@ export function BolmaDetailsDialog({ integration, onClose }: {
         pendingLabel="Synchronizacja i przygotowywanie raportu…"
         isPending={sync.isPending}
         onConfirm={() => {
-          const nextImportId = crypto.randomUUID()
-          setImportId(nextImportId)
-          try { localStorage.setItem(storageKey, nextImportId) } catch { /* The report remains available in this modal. */ }
           download.reset()
-          sync.mutate(nextImportId)
+          sync.mutate()
         }}
       />
     </Dialog>
