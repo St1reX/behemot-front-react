@@ -5,3 +5,10 @@ export interface BolmaIntegration {
   isConfigured: boolean
   sslEnabled: boolean
 }
+
+export interface BolmaStatusResponse {
+  status: 'ok' | 'error'
+  components: {
+    database: 'ok' | 'error'
+  }
+}
